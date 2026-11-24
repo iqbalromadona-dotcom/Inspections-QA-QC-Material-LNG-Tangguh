@@ -1,0 +1,2733 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sistem QA/QC & Tracking Material — LNG Tangguh</title>
+  <style>
+    :root {
+      --navy: #0f172a;
+      --slate-900: #0f172a;
+      --slate-800: #1e293b;
+      --slate-700: #334155;
+      --slate-600: #475569;
+      --slate-500: #64748b;
+      --slate-400: #94a3b8;
+      --slate-200: #e2e8f0;
+      --slate-100: #f1f5f9;
+      --slate-50: #f8fafc;
+      --border: #cbd5e1;
+      --blue: #2563eb;
+      --blue-dark: #1d4ed8;
+      --blue-soft: #dbeafe;
+      --green: #16a34a;
+      --green-dark: #15803d;
+      --green-soft: #dcfce7;
+      --amber: #d97706;
+      --amber-soft: #fef3c7;
+      --red: #dc2626;
+      --red-soft: #fee2e2;
+      --purple: #7c3aed;
+      --purple-soft: #ede9fe;
+      --sidebar-w: 272px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+    body { background: var(--slate-100); color: var(--navy); line-height: 1.45; }
+
+    /* ================= LOGIN SCREEN ================= */
+    #loginScreen {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 55%, #0f172a 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .login-card {
+      background: #fff;
+      width: 100%;
+      max-width: 420px;
+      border-radius: 14px;
+      padding: 28px 26px;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+    }
+    .login-logo {
+      display: inline-block;
+      background: var(--blue-soft);
+      color: var(--blue-dark);
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 999px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .login-card h1 { font-size: 1.25rem; font-weight: 800; color: var(--navy); }
+    .login-card p.sub { font-size: 0.82rem; color: var(--slate-500); margin: 4px 0 18px; }
+    .login-err {
+      background: var(--red-soft); color: #991b1b; border: 1px solid #fca5a5;
+      padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 12px; display: none;
+    }
+
+    /* ================= APP SHELL & SIDEBAR ================= */
+    #appShell { display: none; min-height: 100vh; }
+    .layout-wrap { display: flex; min-height: 100vh; }
+
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--slate-900);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 60;
+      transition: transform 0.25s ease;
+      overflow-y: auto;
+    }
+    .sidebar-brand {
+      padding: 16px 18px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .sidebar-brand h2 { font-size: 0.98rem; font-weight: 800; letter-spacing: 0.2px; }
+    .sidebar-brand span { font-size: 0.72rem; color: var(--slate-400); display: block; margin-top: 2px; }
+
+    /* Building Switcher at Top of Sidebar */
+    .bldg-box {
+      padding: 14px 16px;
+      background: rgba(255,255,255,0.04);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .bldg-label {
+      font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.6px; color: var(--slate-400); margin-bottom: 8px; display: block;
+    }
+    .bldg-switcher { display: flex; flex-direction: column; gap: 6px; }
+    .bldg-btn {
+      width: 100%; text-align: left; padding: 8px 11px; border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.03);
+      color: #e2e8f0; font-size: 0.8rem; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; justify-content: space-between; transition: 0.15s;
+    }
+    .bldg-btn:hover { background: rgba(255,255,255,0.09); }
+    .bldg-btn.active {
+      background: var(--blue); border-color: var(--blue); color: #fff;
+      box-shadow: 0 4px 12px rgba(37,99,235,0.35);
+    }
+    .bldg-tag {
+      font-size: 0.66rem; padding: 2px 6px; border-radius: 4px;
+      background: rgba(0,0,0,0.25); font-weight: 700;
+    }
+
+    /* Sidebar Navigation */
+    .nav-section-title {
+      font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.6px; color: var(--slate-400); padding: 14px 18px 6px;
+    }
+    .side-nav { padding: 0 10px; display: flex; flex-direction: column; gap: 4px; flex: 1; }
+    .nav-item {
+      width: 100%; text-align: left; padding: 10px 12px; border-radius: 8px;
+      border: none; background: transparent; color: #cbd5e1;
+      font-size: 0.82rem; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      transition: 0.15s;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
+    .nav-item.active { background: #1e293b; color: #fff; border-left: 3.5px solid #38bdf8; }
+    .nav-badge {
+      background: var(--red); color: #fff; font-size: 0.68rem; font-weight: 800;
+      padding: 1px 6px; border-radius: 999px;
+    }
+    .nav-badge.amber { background: var(--amber); }
+
+    /* Sidebar Footer User Profile */
+    .sidebar-user {
+      padding: 14px 16px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      background: rgba(0,0,0,0.2);
+    }
+    .user-name { font-size: 0.82rem; font-weight: 700; color: #fff; }
+    .user-role { font-size: 0.72rem; color: #38bdf8; font-weight: 600; margin-bottom: 8px; }
+
+    /* Main Content Area */
+    .main-area {
+      flex: 1;
+      margin-left: var(--sidebar-w);
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .topbar {
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      padding: 12px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 10px; }
+    .hamburger {
+      display: none; background: var(--slate-100); border: 1px solid var(--border);
+      border-radius: 7px; padding: 6px 10px; font-size: 1rem; font-weight: 700; cursor: pointer;
+    }
+    .page-heading h1 { font-size: 1.02rem; font-weight: 800; color: var(--navy); }
+    .page-heading p { font-size: 0.75rem; color: var(--slate-500); }
+
+    .topbar-right { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .conn-pill {
+      font-size: 0.73rem; font-weight: 700; padding: 4px 10px; border-radius: 999px;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .conn-online { background: var(--green-soft); color: #166534; }
+    .conn-local { background: var(--amber-soft); color: #92400e; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; }
+    .conn-online .dot { background: var(--green); }
+    .conn-local .dot { background: var(--amber); }
+
+    .sidebar-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.5); z-index: 55;
+    }
+
+    @media (max-width: 960px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); }
+      .sidebar-overlay.show { display: block; }
+      .main-area { margin-left: 0; }
+      .hamburger { display: inline-flex; }
+    }
+
+    /* ================= BUTTONS & FORMS ================= */
+    .btn {
+      border: none; border-radius: 7px; padding: 8px 13px; font-size: 0.8rem; font-weight: 600;
+      cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      transition: 0.15s; text-decoration: none;
+    }
+    .btn:hover { opacity: 0.92; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-primary { background: var(--blue); color: #fff; }
+    .btn-success { background: var(--green); color: #fff; }
+    .btn-warning { background: var(--amber); color: #fff; }
+    .btn-danger { background: var(--red); color: #fff; }
+    .btn-dark { background: var(--slate-800); color: #fff; }
+    .btn-light { background: var(--slate-50); color: var(--slate-700); border: 1px solid var(--border); }
+    .btn-sm { padding: 5px 9px; font-size: 0.74rem; }
+
+    .form-group { margin-bottom: 12px; }
+    .form-label { display: block; font-size: 0.78rem; font-weight: 700; color: var(--slate-700); margin-bottom: 4px; }
+    .form-control {
+      width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 7px;
+      font-size: 0.84rem; color: var(--navy); background: #fff;
+    }
+    .form-control:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,0.12); }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    @media (max-width: 720px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+    /* ================= CARDS & TABLES ================= */
+    .content-pad { padding: 18px 20px; max-width: 1440px; width: 100%; margin: 0 auto; }
+    .card {
+      background: #fff; border: 1px solid var(--border); border-radius: 10px;
+      padding: 16px; box-shadow: 0 1px 3px rgba(15,23,42,0.04); margin-bottom: 16px;
+    }
+    .card-header {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+      gap: 10px; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--slate-200);
+    }
+    .card-title { font-size: 0.95rem; font-weight: 800; color: var(--slate-800); }
+    .card-sub { font-size: 0.76rem; color: var(--slate-500); }
+
+    .kpi-grid-6 {
+      display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 16px;
+    }
+    @media (max-width: 1200px) { .kpi-grid-6 { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 600px) { .kpi-grid-6 { grid-template-columns: repeat(2, 1fr); } }
+
+    .kpi-card {
+      background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 12px;
+      border-top: 4px solid var(--slate-600);
+    }
+    .kpi-card.amber { border-top-color: var(--amber); }
+    .kpi-card.green { border-top-color: var(--green); }
+    .kpi-card.red { border-top-color: var(--red); }
+    .kpi-card.blue { border-top-color: var(--blue); }
+    .kpi-card.purple { border-top-color: var(--purple); }
+    .kpi-lbl { font-size: 0.7rem; font-weight: 700; color: var(--slate-500); text-transform: uppercase; }
+    .kpi-val { font-size: 1.4rem; font-weight: 800; color: var(--navy); margin: 3px 0; }
+    .kpi-sub { font-size: 0.71rem; color: var(--slate-500); }
+
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+    th {
+      background: var(--slate-50); color: var(--slate-700); font-weight: 700; text-align: left;
+      padding: 9px 10px; border-bottom: 2px solid var(--border); white-space: nowrap;
+    }
+    td { padding: 9px 10px; border-bottom: 1px solid var(--slate-200); vertical-align: middle; }
+    tr:hover td { background: var(--slate-50); }
+    .text-right { text-align: right; }
+    .text-center { text-align: center; }
+
+    .pill {
+      display: inline-block; padding: 3px 8px; border-radius: 999px; font-size: 0.7rem; font-weight: 700; white-space: nowrap;
+    }
+    .pill-green { background: var(--green-soft); color: #166534; }
+    .pill-amber { background: var(--amber-soft); color: #92400e; }
+    .pill-red { background: var(--red-soft); color: #991b1b; }
+    .pill-blue { background: var(--blue-soft); color: #1e40af; }
+    .pill-purple { background: var(--purple-soft); color: #5b21b6; }
+    .pill-gray { background: var(--slate-200); color: var(--slate-700); }
+
+    /* Stacked Progress Bar */
+    .stacked-bar {
+      display: flex; width: 100%; min-width: 90px; height: 10px; background: var(--slate-200);
+      border-radius: 999px; overflow: hidden;
+    }
+    .sb-app { background: var(--green-dark); height: 100%; }
+    .sb-wait { background: #4ade80; height: 100%; }
+    .sb-rw { background: var(--red); height: 100%; }
+
+    /* ================= UNIT SELECTOR GRID (001..380) ================= */
+    .unit-panel {
+      border: 1px solid var(--border); border-radius: 8px; padding: 12px; background: var(--slate-50);
+    }
+    .unit-toolbar {
+      display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .range-pills { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
+    .range-pill {
+      padding: 3px 8px; font-size: 0.72rem; font-weight: 700; border-radius: 6px;
+      border: 1px solid var(--border); background: #fff; cursor: pointer;
+    }
+    .range-pill.active { background: var(--slate-800); color: #fff; border-color: var(--slate-800); }
+    .unit-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+      gap: 6px;
+      max-height: 230px;
+      overflow-y: auto;
+      padding: 4px;
+    }
+    .u-btn {
+      padding: 6px 4px; border-radius: 6px; font-size: 0.76rem; font-weight: 700;
+      text-align: center; cursor: pointer; border: 1.5px solid var(--border);
+      background: #fff; color: var(--navy); transition: 0.1s;
+    }
+    .u-btn:hover:not(:disabled) { border-color: var(--blue); }
+    .u-btn.selected { background: var(--blue); border-color: var(--blue); color: #fff; }
+    .u-btn.done { background: var(--green-soft); border-color: #86efac; color: #166534; cursor: not-allowed; opacity: 0.85; }
+    .u-btn.rework { background: var(--red-soft); border-color: #fca5a5; color: #991b1b; cursor: not-allowed; }
+
+    /* Doc Control Reference Box inside Input Form */
+    .doc-ref-box {
+      border: 1px solid #bfdbfe; background: #eff6ff; border-radius: 9px; padding: 12px;
+      display: grid; grid-template-columns: 180px 1fr; gap: 12px; align-items: center;
+      margin-bottom: 14px;
+    }
+    @media (max-width: 640px) { .doc-ref-box { grid-template-columns: 1fr; } }
+    .doc-ref-img {
+      width: 100%; height: 130px; object-fit: contain; background: #fff;
+      border: 1px solid #cbd5e1; border-radius: 7px; padding: 4px;
+    }
+
+    /* ================= IN-APP LIVE CAMERA (ZERO GALLERY STORAGE) ================= */
+    .cam-box {
+      border: 2px dashed #64748b; border-radius: 9px; padding: 12px; background: var(--slate-50);
+      text-align: center;
+    }
+    .cam-video {
+      width: 100%; max-height: 280px; border-radius: 8px; background: #000; display: none;
+      margin: 8px auto;
+    }
+    .cam-preview {
+      width: 100%; max-height: 280px; object-fit: contain; border-radius: 8px;
+      border: 1px solid var(--border); display: none; margin: 8px auto;
+    }
+
+    /* ================= MODALS ================= */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(15,23,42,0.6);
+      display: none; align-items: center; justify-content: center; z-index: 100; padding: 16px;
+    }
+    .modal-backdrop.show { display: flex; }
+    .modal {
+      background: #fff; border-radius: 12px; max-width: 620px; width: 100%;
+      max-height: 92vh; overflow-y: auto; padding: 20px; box-shadow: 0 25px 40px rgba(0,0,0,0.3);
+    }
+    .modal-title { font-size: 1.05rem; font-weight: 800; color: var(--navy); margin-bottom: 4px; }
+    .modal-desc { font-size: 0.8rem; color: var(--slate-500); margin-bottom: 14px; }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+
+    /* ================= PRINT A4 BOQ REPORT ================= */
+    #printOnlyArea { display: none; }
+    @media print {
+      body { background: #fff; }
+      #loginScreen, #appShell, .modal-backdrop { display: none !important; }
+      #printOnlyArea { display: block !important; padding: 12px; }
+      .p-head { border-bottom: 2.5px solid #0f172a; padding-bottom: 10px; margin-bottom: 14px; }
+      .p-head h2 { font-size: 15pt; color: #0f172a; }
+      .p-head p { font-size: 9pt; color: #334155; }
+      .p-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 8.5pt; }
+      .p-table th, .p-table td { border: 1px solid #94a3b8; padding: 6px 7px; }
+      .p-table th { background: #0f172a !important; color: #fff !important; -webkit-print-color-adjust: exact; }
+      .p-sign { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 28px; text-align: center; font-size: 9.5pt; }
+      .p-sign-box { height: 65px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== 1. LOGIN SCREEN ==================== -->
+  <div id="loginScreen">
+    <div class="login-card">
+      <span class="login-logo">LNG Tangguh • Temporary Utility</span>
+      <h1>Sistem QA/QC &amp; Tracking Material</h1>
+      <p class="sub">Silakan login menggunakan Username dan Sandi yang terdaftar pada sistem.</p>
+
+      <div id="loginErr" class="login-err">Username atau Sandi salah, atau akun tidak aktif.</div>
+
+      <form onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <input type="text" id="loginUser" class="form-control" placeholder="Contoh: se_iqbal atau teknisi1" required autocomplete="username" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Sandi / Password</label>
+          <div style="display:flex; gap:6px;">
+            <input type="password" id="loginPass" class="form-control" placeholder="Masukkan sandi..." required autocomplete="current-password" />
+            <button type="button" class="btn btn-light" onclick="togglePassVisibility()" title="Lihat Sandi">Lihat</button>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%; padding:10px; margin-top:4px; font-size:0.88rem;">
+          Masuk ke Sistem
+        </button>
+      </form>
+
+      <div style="margin-top:16px; padding-top:12px; border-top:1px solid var(--slate-200); display:flex; justify-content:space-between; align-items:center; font-size:0.75rem; color:var(--slate-500);">
+        <span id="loginConnStatus">Status DB: Mode Lokal</span>
+        <button type="button" class="btn btn-light btn-sm" onclick="openDbModal()">Atur URL Google Sheets</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 2. MAIN APPLICATION SHELL ==================== -->
+  <div id="appShell">
+    <div class="layout-wrap">
+      <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleSidebar(false)"></div>
+
+      <!-- LEFT SIDEBAR -->
+      <aside id="sidebar" class="sidebar">
+        <div class="sidebar-brand">
+          <h2>QA/QC LNG TANGGUH</h2>
+          <span>Office &amp; Workshop • Jakarta &rarr; Papua</span>
+        </div>
+
+        <!-- PEMISAH 2 SISTEM BANGUNAN -->
+        <div class="bldg-box">
+          <span class="bldg-label">Sistem Area Bangunan</span>
+          <div class="bldg-switcher" id="bldgSwitcher"></div>
+        </div>
+
+        <!-- NAVIGASI TERSTRUKTUR -->
+        <div class="nav-section-title">Menu Utama</div>
+        <nav class="side-nav" id="sideNavMenu"></nav>
+
+        <!-- USER PROFILE & LOGOUT -->
+        <div class="sidebar-user">
+          <div class="user-name" id="sbUserName">-</div>
+          <div class="user-role" id="sbUserRole">-</div>
+          <div style="display:flex; gap:6px;">
+            <button class="btn btn-light btn-sm" style="flex:1;" onclick="syncFromCloud()">Sync</button>
+            <button class="btn btn-danger btn-sm" style="flex:1;" onclick="handleLogout()">Logout</button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- MAIN WORKSPACE -->
+      <div class="main-area">
+        <header class="topbar">
+          <div class="topbar-left">
+            <button class="hamburger" onclick="toggleSidebar(true)">&#9776; Menu</button>
+            <div class="page-heading">
+              <h1 id="topPageTitle">Dashboard Monitoring &amp; Kurva S</h1>
+              <p id="topPageSub">Area aktif: Bangunan Office</p>
+            </div>
+          </div>
+          <div class="topbar-right">
+            <span id="connPill" class="conn-pill conn-local"><span class="dot"></span> <span id="connPillText">Mode Lokal</span></span>
+            <button class="btn btn-light btn-sm" id="btnTopDb" onclick="openDbModal()">Database</button>
+            <button class="btn btn-primary btn-sm" onclick="syncFromCloud()">Refresh Data</button>
+          </div>
+        </header>
+
+        <div class="content-pad">
+
+          <!-- ==================== MENU 1: DASHBOARD & KURVA S ==================== -->
+          <section id="secDashboard">
+            <div class="kpi-grid-6" id="kpiGrid6"></div>
+
+            <!-- KURVA S -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">Kurva S Progres Fabrikasi (4 Minggu)</div>
+                  <div class="card-sub">Kumulatif Rencana (Plan) vs Aktual Lolos QA/QC</div>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                  <span id="scurveStatusBadge" class="pill pill-green">ON TRACK</span>
+                  <button class="btn btn-light btn-sm" id="btnCurvePct" onclick="setCurveMode('pct')">% Kumulatif</button>
+                  <button class="btn btn-light btn-sm" id="btnCurveQty" onclick="setCurveMode('qty')">Qty Kumulatif</button>
+                </div>
+              </div>
+              <div style="display:flex; gap:16px; font-size:0.78rem; margin-bottom:8px; flex-wrap:wrap;">
+                <span style="display:inline-flex; align-items:center; gap:6px; font-weight:700; color:var(--slate-600);">
+                  <span style="width:12px; height:3px; background:#64748b; display:inline-block;"></span> Rencana (Plan)
+                </span>
+                <span style="display:inline-flex; align-items:center; gap:6px; font-weight:700; color:var(--green-dark);">
+                  <span style="width:12px; height:3px; background:#16a34a; display:inline-block;"></span> Aktual Lolos QA/QC
+                </span>
+              </div>
+              <div id="scurveSvgWrap" style="overflow-x:auto;"></div>
+              <div class="table-wrap" style="margin-top:10px;">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Parameter Kumulatif</th>
+                      <th class="text-center">Minggu 1 (W1)</th>
+                      <th class="text-center">Minggu 2 (W2)</th>
+                      <th class="text-center">Minggu 3 (W3)</th>
+                      <th class="text-center">Minggu 4 (W4)</th>
+                    </tr>
+                  </thead>
+                  <tbody id="scurveTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- TABEL REKAP BOQ -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">Rekapitulasi Item BOQ, Status QA/QC &amp; Penerimaan Papua</div>
+                  <div class="card-sub">Batang progres: Hijau Tua = Approved Jakarta | Hijau Muda = Menunggu Approval | Merah = Rework</div>
+                </div>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Bangunan</th>
+                      <th>Kode Item</th>
+                      <th>Deskripsi Item</th>
+                      <th>Warna</th>
+                      <th class="text-right">Target BOQ</th>
+                      <th class="text-right">Lolos QC</th>
+                      <th class="text-right">Approved</th>
+                      <th class="text-right">Rework</th>
+                      <th class="text-right">Tiba Papua</th>
+                      <th class="text-right">Kurang / Sisa</th>
+                      <th>Status Visual</th>
+                    </tr>
+                  </thead>
+                  <tbody id="dashBoqBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <!-- ==================== MENU 2: DOCUMENT CONTROL ==================== -->
+          <section id="secDocControl" style="display:none;">
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">Document Control — Standar Gambar Kerja &amp; Target BOQ per Kode</div>
+                  <div class="card-sub">Gambar &amp; catatan standar di sini otomatis tampil di layar HP teknisi saat memilih kode item</div>
+                </div>
+                <button class="btn btn-primary btn-sm" id="btnAddBoqDoc" onclick="openBoqModal(null)">+ Tambah / Atur Item BOQ &amp; Gambar</button>
+              </div>
+              <div class="grid-3" id="docControlCards"></div>
+            </div>
+          </section>
+
+          <!-- ==================== MENU 3: INPUT INSPEKSI & APPROVAL JAKARTA ==================== -->
+          <section id="secInspection" style="display:none;">
+            <!-- Banner khusus PM -->
+            <div id="pmNoticeBanner" class="card" style="display:none; background:#eff6ff; border-color:#bfdbfe;">
+              <div style="font-weight:800; color:#1e40af; font-size:0.9rem;">Mode Project Manager (Monitoring &amp; Approval Akhir)</div>
+              <div style="font-size:0.8rem; color:#1e3a8a; margin-top:2px;">Form input lapangan dinonaktifkan untuk akun Project Manager. Silakan tinjau bukti foto dan berikan keputusan <strong>Approve</strong> atau <strong>Rework</strong> pada tabel di bawah.</div>
+            </div>
+
+            <!-- FORM INPUT TEKNISI / SITE ENGINEER -->
+            <div id="workshopInputCard" class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">Form Input Inspeksi QA/QC — Workshop Jakarta</div>
+                  <div class="card-sub">Pilih kode item, ketuk nomor satuan 3-digit (001–380+), dan ambil foto bukti langsung</div>
+                </div>
+                <span class="pill pill-blue" id="nextBundleBadge" style="font-size:0.82rem; padding:5px 12px;">Tag Berikutnya: OFC-UMP-A1-001</span>
+              </div>
+
+              <form id="inspForm" onsubmit="submitInspectionForm(event)">
+                <div class="grid-3">
+                  <div class="form-group" id="formBldgSelectWrap">
+                    <label class="form-label">Area Bangunan</label>
+                    <select id="fInspBangunan" class="form-control" onchange="onInspBuildingChange()">
+                      <option value="Office">Bangunan Office</option>
+                      <option value="Workshop">Bangunan Workshop</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Pilih Kode Item BOQ</label>
+                    <select id="fInspKode" class="form-control" onchange="onInspItemChange()" required></select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Periode Minggu</label>
+                    <select id="fInspMinggu" class="form-control">
+                      <option value="W1">Minggu 1 (W1)</option>
+                      <option value="W2">Minggu 2 (W2)</option>
+                      <option value="W3">Minggu 3 (W3)</option>
+                      <option value="W4">Minggu 4 (W4)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- PREVIEW LINEAR DARI DOCUMENT CONTROL -->
+                <div class="doc-ref-box" id="inspDocPreview">
+                  <img id="inspRefImg" class="doc-ref-img" src="" alt="Referensi Gambar" />
+                  <div>
+                    <div style="font-size:0.72rem; font-weight:800; color:var(--blue-dark); text-transform:uppercase;">Referensi Standar Document Control</div>
+                    <div id="inspRefTitle" style="font-size:0.92rem; font-weight:800; color:var(--navy); margin:2px 0;">-</div>
+                    <div id="inspRefMeta" style="font-size:0.76rem; color:var(--slate-700); margin-bottom:4px;">-</div>
+                    <div id="inspRefNote" style="font-size:0.78rem; background:#fff; padding:6px 8px; border-radius:6px; border:1px solid #cbd5e1; color:var(--slate-800);">-</div>
+                  </div>
+                </div>
+
+                <!-- PEMILIH NOMOR SATUAN 3 DIGIT (001 .. TARGET BOQ) -->
+                <div class="form-group">
+                  <label class="form-label">Pilih Nomor Satuan Unit (3-Digit) — Hijau = Sudah OK, Merah = Rework</label>
+                  <div class="unit-panel">
+                    <div class="unit-toolbar">
+                      <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+                        <input type="text" id="unitSearchInp" class="form-control" style="width:130px; padding:5px 8px; font-size:0.78rem;" placeholder="Cari nomor (045)" oninput="renderUnitGrid()" />
+                        <button type="button" class="btn btn-light btn-sm" onclick="selectNextAvailableUnits(10)">+ Pilih 10 Unit Tersedia</button>
+                        <button type="button" class="btn btn-light btn-sm" onclick="clearSelectedUnits()">Reset Pilihan</button>
+                      </div>
+                      <div style="font-size:0.8rem; font-weight:800; color:var(--blue-dark);" id="selectedUnitSummary">
+                        0 Unit Dipilih
+                      </div>
+                    </div>
+                    <div class="range-pills" id="unitRangePills"></div>
+                    <div class="unit-grid" id="unitGridContainer"></div>
+                  </div>
+                </div>
+
+                <div class="grid-2">
+                  <div>
+                    <div class="form-group">
+                      <label class="form-label">Hasil Pemeriksaan QA/QC</label>
+                      <select id="fInspStatusQc" class="form-control" onchange="refreshLiveWatermarkPreview()">
+                        <option value="OK">LOLOS QA/QC (OK — Siap Approval)</option>
+                        <option value="Rework">REWORK (NG — Perlu Perbaikan)</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Catatan Teknis Inspeksi (Dimensi, Las, Lubang Baut, Cat)</label>
+                      <textarea id="fInspCatatan" class="form-control" rows="3" placeholder="Tuliskan hasil pemeriksaan fisik atau detail bagian yang perlu rework..."></textarea>
+                    </div>
+                  </div>
+
+                  <!-- KAMERA LANGSUNG DI WEB (ZERO GALLERY STORAGE) -->
+                  <div class="form-group">
+                    <label class="form-label">Foto Bukti Fisik &amp; Label (Wajib — Tidak Masuk Galeri HP)</label>
+                    <div class="cam-box">
+                      <div style="display:flex; gap:6px; justify-content:center; flex-wrap:wrap;">
+                        <button type="button" class="btn btn-dark btn-sm" onclick="openLiveCamera('insp')">Buka Kamera Live (Tanpa Galeri)</button>
+                        <button type="button" class="btn btn-light btn-sm" onclick="triggerFallbackFile('insp')">Upload File Cadangan</button>
+                      </div>
+                      <div style="font-size:0.71rem; color:var(--slate-500); margin-top:4px;">Otomatis diberi stempel watermark Tag Bundel, Kode Item, Petugas &amp; Jam WIB</div>
+                      <img id="inspPhotoPreview" class="cam-preview" alt="Hasil Foto Watermark" />
+                      <input type="file" id="inspFallbackInput" accept="image/*" style="display:none" onchange="handleFallbackFile(event, 'insp')" />
+                    </div>
+                  </div>
+                </div>
+
+                <button type="submit" id="btnSubmitInsp" class="btn btn-primary" style="width:100%; padding:11px; font-size:0.88rem;">
+                  Simpan Hasil Inspeksi &amp; Terbitkan Tag Bundel
+                </button>
+              </form>
+            </div>
+
+            <!-- ANTREAN REWORK (PERBAIKAN) -->
+            <div class="card" style="border-left: 4px solid var(--red);">
+              <div class="card-header">
+                <div>
+                  <div class="card-title" style="color:var(--red);">Antrean Perbaikan / Rework (Workshop Jakarta)</div>
+                  <div class="card-sub">Foto temuan NG awal tetap tersimpan permanen saat teknisi mengunggah foto setelah perbaikan</div>
+                </div>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Tag Bundel</th>
+                      <th>Bangunan &amp; Item</th>
+                      <th>Nomor Unit NG</th>
+                      <th>Catatan Temuan NG</th>
+                      <th class="text-center">Foto NG Awal</th>
+                      <th class="text-center">Tindak Lanjut</th>
+                    </tr>
+                  </thead>
+                  <tbody id="reworkTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- LOG INSPEKSI & APPROVAL ATASAN -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">Log Inspeksi Harian &amp; Approval Atasan (Jakarta)</div>
+                  <div class="card-sub">Klik tombol Approve / Rework untuk memvalidasi bundel sebelum dikirim ke Papua</div>
+                </div>
+                <select id="filterLogApproval" class="form-control" style="width:auto; padding:5px 10px; font-size:0.78rem;" onchange="renderInspectionTables()">
+                  <option value="ALL">Semua Status Approval</option>
+                  <option value="Menunggu Approval">Menunggu Approval</option>
+                  <option value="Approved">Sudah Approved</option>
+                  <option value="Rework">Rework (NG)</option>
+                </select>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Tag Bundel &amp; Minggu</th>
+                      <th>Bangunan &amp; Kode Item</th>
+                      <th>Unit &amp; Qty</th>
+                      <th>Catatan &amp; Petugas</th>
+                      <th class="text-center">Dokumentasi Foto</th>
+                      <th>Status Approval</th>
+                      <th class="text-center">Aksi Atasan</th>
+                    </tr>
+                  </thead>
+                  <tbody id="logJakartaBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <!-- ==================== MENU 4: TRACKING SHIPPING & QC INCOMING PAPUA ==================== -->
+          <section id="secPapua" style="display:none;">
+            <div class="grid-3" style="margin-bottom:14px;">
+              <div class="kpi-card green">
+                <div class="kpi-lbl">1. Siap Kirim (Approved JKT)</div>
+                <div class="kpi-val" id="cntSiapKirim">0</div>
+                <div class="kpi-sub">Bundel siap masuk kontainer</div>
+              </div>
+              <div class="kpi-card blue">
+                <div class="kpi-lbl">2. Dalam Pengiriman (Shipping)</div>
+                <div class="kpi-val" id="cntShipping">0</div>
+                <div class="kpi-sub">Sedang dalam perjalanan ke Bintuni</div>
+              </div>
+              <div class="kpi-card purple">
+                <div class="kpi-lbl">3. QC Incoming Papua (Diterima)</div>
+                <div class="kpi-val" id="cntPapuaDone">0</div>
+                <div class="kpi-sub">Sudah dibongkar &amp; dicek di Site Papua</div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">Tracking Pengiriman (Jakarta &rarr; Papua) &amp; QC Incoming Site Papua</div>
+                  <div class="card-sub">Centang bundel berstatus "Siap Kirim" untuk mencatat keberangkatan kontainer, lalu update QC Incoming saat tiba di Papua</div>
+                </div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                  <select id="filterTrackingStage" class="form-control" style="width:auto; padding:5px 10px; font-size:0.78rem;" onchange="renderPapuaTracking()">
+                    <option value="ALL">Semua Tahap Pengiriman</option>
+                    <option value="Siap Kirim">1. Siap Kirim (Approved JKT)</option>
+                    <option value="Dalam Pengiriman">2. Dalam Pengiriman</option>
+                    <option value="QC Incoming Papua">3. QC Incoming Papua (Diterima)</option>
+                  </select>
+                  <button class="btn btn-primary btn-sm" id="btnBatchShipping" onclick="openShippingModal()">+ Input Keberangkatan Kontainer</button>
+                </div>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th style="width:32px;"><input type="checkbox" id="chkAllShip" onclick="toggleAllShipCheck(this.checked)" /></th>
+                      <th>Tag Bundel</th>
+                      <th>Bangunan &amp; Item</th>
+                      <th>Unit &amp; Qty</th>
+                      <th>Status Tracking</th>
+                      <th>Info Kontainer / Shipping</th>
+                      <th>Hasil QC Incoming Papua</th>
+                      <th class="text-center">Foto Trail</th>
+                      <th class="text-center">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody id="trackingTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <!-- ==================== MENU 5: CETAK PDF BERDASARKAN BOQ ==================== -->
+          <section id="secPdfBoq" style="display:none;">
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">Pratinjau Laporan Berita Acara Berdasarkan Urutan BOQ</div>
+                  <div class="card-sub">Laporan otomatis mengikuti filter area bangunan aktif di sidebar kiri</div>
+                </div>
+                <button class="btn btn-success" onclick="printBoqPdf()">Cetak / Simpan PDF (A4)</button>
+              </div>
+              <div id="boqReportPreviewContainer" style="border:1px solid var(--border); border-radius:8px; padding:18px; background:#fff;"></div>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: LIVE CAMERA VIEWFINDER ==================== -->
+  <div id="cameraModal" class="modal-backdrop">
+    <div class="modal" style="max-width:540px; text-align:center;">
+      <div class="modal-title">Kamera Inspeksi Live (Zero Gallery Storage)</div>
+      <div class="modal-desc">Foto langsung diproses di memori aplikasi dengan watermark otomatis tanpa memenuhi memori galeri HP.</div>
+      <video id="liveVideoEl" class="cam-video" autoplay playsinline></video>
+      <div id="camErrorMsg" style="display:none; color:var(--red); font-size:0.8rem; margin:10px 0;"></div>
+      <div style="display:flex; gap:10px; justify-content:center; margin-top:12px;">
+        <button type="button" class="btn btn-light" onclick="closeLiveCamera()">Batal</button>
+        <button type="button" class="btn btn-primary" id="btnSnapPhoto" onclick="snapLivePhoto()" style="padding:10px 20px; font-size:0.9rem;">
+          Jepret Foto Sekarang
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: SELESAI PERBAIKAN REWORK ==================== -->
+  <div id="reworkModal" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-title">Selesai Perbaikan Rework (Dual-Photo Traceability)</div>
+      <div class="modal-desc" id="rwModalDesc">-</div>
+      <input type="hidden" id="rwLogId" />
+
+      <div style="background:var(--red-soft); border:1px solid #fca5a5; border-radius:8px; padding:10px; margin-bottom:12px;">
+        <div style="font-size:0.74rem; font-weight:800; color:#991b1b; margin-bottom:4px;">Bukti Foto Temuan NG Awal (Tersimpan Permanen):</div>
+        <img id="rwOldNgImg" src="" alt="Foto NG Awal" style="max-height:130px; border-radius:6px; display:none; margin-bottom:4px;" />
+        <div id="rwOldNgNote" style="font-size:0.78rem; color:#7f1d1d;">-</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Catatan Hasil Perbaikan</label>
+        <textarea id="rwRepairNote" class="form-control" rows="2" placeholder="Contoh: Las ulang penuh & gerinda rata, jarak lubang sudah sesuai mal." required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Foto Setelah Perbaikan (After Repair — Wajib)</label>
+        <div class="cam-box">
+          <div style="display:flex; gap:6px; justify-content:center;">
+            <button type="button" class="btn btn-dark btn-sm" onclick="openLiveCamera('rework')">Buka Kamera Live</button>
+            <button type="button" class="btn btn-light btn-sm" onclick="triggerFallbackFile('rework')">File Cadangan</button>
+          </div>
+          <img id="rwPhotoPreview" class="cam-preview" alt="Preview After Repair" />
+          <input type="file" id="rwFallbackInput" accept="image/*" style="display:none" onchange="handleFallbackFile(event, 'rework')" />
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-light" onclick="closeModal('reworkModal')">Batal</button>
+        <button class="btn btn-success" id="btnSubmitRework" onclick="submitReworkResolution()">Simpan Hasil Perbaikan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: APPROVAL ATASAN ==================== -->
+  <div id="approveModal" class="modal-backdrop">
+    <div class="modal" style="max-width:460px;">
+      <div class="modal-title">Verifikasi &amp; Approval Inspeksi</div>
+      <div class="modal-desc" id="appModalDesc">-</div>
+      <input type="hidden" id="appLogId" />
+      <div class="form-group">
+        <label class="form-label">Keputusan Pemeriksa (<span id="appUserLabel">-</span>)</label>
+        <select id="appDecision" class="form-control">
+          <option value="Approved">APPROVED (Lolos &amp; Siap Kirim ke Papua)</option>
+          <option value="Rework">KEMBALIKAN KE REWORK (Perlu Perbaikan Ulang)</option>
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-light" onclick="closeModal('approveModal')">Batal</button>
+        <button class="btn btn-success" id="btnConfirmApp" onclick="submitApproval()">Konfirmasi Keputusan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: INPUT KEBERANGKATAN SHIPPING ==================== -->
+  <div id="shippingModal" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-title">Input Keberangkatan Pengiriman (Jakarta &rarr; Papua)</div>
+      <div class="modal-desc" id="shipModalDesc">-</div>
+      <div class="grid-3">
+        <div class="form-group">
+          <label class="form-label">No. Kontainer / Surat Jalan</label>
+          <input type="text" id="shipNoKontainer" class="form-control" placeholder="TEMU-408921 / SJ-01" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tanggal Berangkat</label>
+          <input type="date" id="shipTglBerangkat" class="form-control" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Estimasi Tiba Papua</label>
+          <input type="date" id="shipEstimasi" class="form-control" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Foto Loading / Segel Kontainer (Wajib)</label>
+        <div class="cam-box">
+          <div style="display:flex; gap:6px; justify-content:center;">
+            <button type="button" class="btn btn-dark btn-sm" onclick="openLiveCamera('shipping')">Buka Kamera Live</button>
+            <button type="button" class="btn btn-light btn-sm" onclick="triggerFallbackFile('shipping')">File Cadangan</button>
+          </div>
+          <img id="shipPhotoPreview" class="cam-preview" alt="Preview Shipping" />
+          <input type="file" id="shipFallbackInput" accept="image/*" style="display:none" onchange="handleFallbackFile(event, 'shipping')" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-light" onclick="closeModal('shippingModal')">Batal</button>
+        <button class="btn btn-primary" id="btnSubmitShip" onclick="submitShipping()">Simpan Data Pengiriman</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: INPUT QC INCOMING SITE PAPUA ==================== -->
+  <div id="papuaModal" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-title">Input QC Incoming — Site Teluk Bintuni, Papua</div>
+      <div class="modal-desc" id="papuaModalDesc">-</div>
+      <input type="hidden" id="papuaLogId" />
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label">Tanggal Terima di Site Papua</label>
+          <input type="date" id="papuaTglTerima" class="form-control" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Kondisi Fisik &amp; Kelengkapan</label>
+          <select id="papuaKondisi" class="form-control">
+            <option value="Lengkap & Mulus">Lengkap &amp; Mulus (Diterima Baik)</option>
+            <option value="Kurang / Rusak di Perjalanan">Kurang / Rusak di Perjalanan (Ada Catatan)</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Catatan Pemeriksaan Bongkar Site Papua</label>
+        <textarea id="papuaCatatan" class="form-control" rows="2" placeholder="Contoh: Jumlah batang & karung baut lengkap, cat kode warna jelas, siap instalasi."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Foto Bukti QC Incoming Site Papua (Wajib)</label>
+        <div class="cam-box">
+          <div style="display:flex; gap:6px; justify-content:center;">
+            <button type="button" class="btn btn-dark btn-sm" onclick="openLiveCamera('papua')">Buka Kamera Live</button>
+            <button type="button" class="btn btn-light btn-sm" onclick="triggerFallbackFile('papua')">File Cadangan</button>
+          </div>
+          <img id="papuaPhotoPreview" class="cam-preview" alt="Preview Incoming Papua" />
+          <input type="file" id="papuaFallbackInput" accept="image/*" style="display:none" onchange="handleFallbackFile(event, 'papua')" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-light" onclick="closeModal('papuaModal')">Batal</button>
+        <button class="btn btn-success" id="btnSubmitPapua" onclick="submitPapuaIncoming()">Simpan QC Incoming Papua</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: TAMBAH / EDIT BOQ & DOCUMENT CONTROL ==================== -->
+  <div id="boqModal" class="modal-backdrop">
+    <div class="modal" style="max-width:650px;">
+      <div class="modal-title" id="boqModalTitle">Atur Item BOQ &amp; Standar Gambar Document Control</div>
+      <div class="modal-desc">Perubahan di sini langsung memperbarui target BOQ, Kurva S, nomor satuan (001..N), dan gambar acuan teknisi.</div>
+      <input type="hidden" id="bIdItem" />
+      <div class="grid-3">
+        <div class="form-group">
+          <label class="form-label">Bangunan</label>
+          <select id="bBangunan" class="form-control">
+            <option value="Office">Office</option>
+            <option value="Workshop">Workshop</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Kode Item</label>
+          <input type="text" id="bKode" class="form-control" placeholder="Contoh: K1" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Kode Warna Modul</label>
+          <select id="bWarna" class="form-control">
+            <option value="Merah">Merah</option>
+            <option value="Biru">Biru</option>
+            <option value="Kuning">Kuning</option>
+            <option value="Hijau">Hijau</option>
+            <option value="Putih">Putih</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label">Nama / Deskripsi Item BOQ</label>
+          <input type="text" id="bNama" class="form-control" placeholder="Kolom Utama WF 200x100" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Section / Kelompok</label>
+          <input type="text" id="bSection" class="form-control" placeholder="Struktur Utama" required />
+        </div>
+      </div>
+      <div class="grid-3">
+        <div class="form-group">
+          <label class="form-label">Satuan</label>
+          <input type="text" id="bSatuan" class="form-control" value="Batang" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Target Total BOQ</label>
+          <input type="number" id="bTarget" class="form-control" min="1" value="20" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Plan Kumulatif W1 / W2 / W3 / W4</label>
+          <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:4px;">
+            <input type="number" id="bW1" class="form-control" placeholder="W1" min="0" value="5" />
+            <input type="number" id="bW2" class="form-control" placeholder="W2" min="0" value="10" />
+            <input type="number" id="bW3" class="form-control" placeholder="W3" min="0" value="15" />
+            <input type="number" id="bW4" class="form-control" placeholder="W4" min="0" value="20" />
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Catatan Standar Teknis (Tampil ke Teknisi Saat Input)</label>
+        <textarea id="bCatatan" class="form-control" rows="2" placeholder="Spesifikasi ukuran, mal lubang baut, dan aturan bundling..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Upload Gambar Referensi / Potongan Shop Drawing (Opsional)</label>
+        <input type="file" id="bFileImg" accept="image/*" class="form-control" onchange="handleBoqDocImage(event)" />
+        <img id="bImgPreview" src="" alt="Preview Dokumen" style="max-height:130px; margin-top:8px; display:none; border-radius:6px; border:1px solid var(--border);" />
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-light" onclick="closeModal('boqModal')">Batal</button>
+        <button class="btn btn-primary" id="btnSaveBoqDoc" onclick="saveBoqDoc()">Simpan Item BOQ &amp; Dokumen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: GALLERY / PHOTO TRAIL VIEWER ==================== -->
+  <div id="photoTrailModal" class="modal-backdrop" onclick="closeModal('photoTrailModal')">
+    <div class="modal" style="max-width:720px;" onclick="event.stopPropagation()">
+      <div class="modal-title" id="ptModalTitle">Jejak Dokumentasi Foto (Traceability)</div>
+      <div class="modal-desc" id="ptModalSub">-</div>
+      <div class="grid-2" id="ptPhotosGrid"></div>
+      <div class="modal-footer">
+        <button class="btn btn-dark" onclick="closeModal('photoTrailModal')">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: DATABASE URL CONFIG ==================== -->
+  <div id="dbModal" class="modal-backdrop">
+    <div class="modal" style="max-width:520px;">
+      <div class="modal-title">Hubungkan Database Google Sheets &amp; Drive</div>
+      <div class="modal-desc">Tempel URL Web App Google Apps Script (/exec) agar semua user terhubung secara real-time.</div>
+      <div class="form-group">
+        <label class="form-label">URL Web App Google Apps Script</label>
+        <input type="url" id="inpApiUrl" class="form-control" placeholder="https://script.google.com/macros/s/AKfycb.../exec" />
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-light" onclick="closeModal('dbModal')">Batal</button>
+        <button class="btn btn-primary" onclick="saveApiUrl()">Simpan &amp; Sinkronkan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRINTABLE A4 REPORT CONTAINER -->
+  <div id="printOnlyArea"></div>
+
+  <script>
+    // =========================================================================
+    // KONFIGURASI URL GOOGLE APPS SCRIPT (Tempel URL /exec Anda di sini)
+    // =========================================================================
+    const DEFAULT_API_URL = "https://script.google.com/macros/s/AKfycbxyAcsM0LYV6sou5e5crw7Fv5oHBLkNu1fhBGCOomgHLu8bxvWM3BHnk5hsOCFmQILX/exec";
+
+    let apiUrl = localStorage.getItem("tangguh_v2_api_url") || DEFAULT_API_URL;
+    let currentUser = JSON.parse(localStorage.getItem("tangguh_v2_user")) || null;
+    let activeBuilding = "Office"; // 'Office' | 'Workshop' | 'Gabungan'
+    let activeMenu = "dashboard"; // 'dashboard' | 'doc' | 'inspection' | 'papua' | 'pdf'
+    let curveMode = "pct";
+
+    // Unit selector state
+    let selectedUnits = new Set();
+    let activeUnitRangeStart = 1;
+
+    // Captured watermarked images (Base64)
+    let capturedPhotos = { insp: "", rework: "", shipping: "", papua: "", boqDoc: "" };
+    let activeCamTarget = null;
+    let activeStream = null;
+    let selectedShipIds = new Set();
+
+    // Default Master Users (Fallback sebelum tersinkron ke Google Sheets)
+    let masterUsers = [
+      { userId: "USR-01", username: "pm_tangguh", sandi: "PM2026#", nama: "Project Manager", role: "PM", aksesBangunan: "Semua", bisaInput: false, bisaApprove: true, kelolaDocBoq: false },
+      { userId: "USR-02", username: "se_iqbal", sandi: "SE2026#", nama: "Iqbal Romadona (Site Eng)", role: "Site_Engineer", aksesBangunan: "Semua", bisaInput: true, bisaApprove: true, kelolaDocBoq: true },
+      { userId: "USR-03", username: "teknisi1", sandi: "TEK101", nama: "Teknisi 1 (Fabrikasi)", role: "Teknisi", aksesBangunan: "Office, Workshop", bisaInput: true, bisaApprove: false, kelolaDocBoq: false },
+      { userId: "USR-04", username: "teknisi2", sandi: "TEK202", nama: "Teknisi 2 (Fabrikasi)", role: "Teknisi", aksesBangunan: "Office, Workshop", bisaInput: true, bisaApprove: false, kelolaDocBoq: false },
+      { userId: "USR-05", username: "teknisi3", sandi: "TEK303", nama: "Teknisi 3 (Kitting & Label)", role: "Teknisi", aksesBangunan: "Office, Workshop", bisaInput: true, bisaApprove: false, kelolaDocBoq: false }
+    ];
+
+    // Default BOQ & Document Control
+    const defaultBoqItems = [
+      { idItem: "BOQ-OFC-01", bangunan: "Office", kodeItem: "UMP-A1", namaItem: "Umpak & Angkur Tipe A1", section: "Struktur Bawah", warna: "Merah", satuan: "Set", target: 20, planW1: 10, planW2: 18, planW3: 20, planW4: 20, gambarUrl: "", catatanStandar: "Cek jarak as baut angkur M20 dengan mal base plate, mur & ring diikat 1 paket." },
+      { idItem: "BOQ-OFC-02", bangunan: "Office", kodeItem: "K1", namaItem: "Kolom Utama WF 200x100", section: "Struktur Utama", warna: "Biru", satuan: "Batang", target: 36, planW1: 6, planW2: 18, planW3: 30, planW4: 36, gambarUrl: "", catatanStandar: "Pastikan panjang potong presisi, pelat sambung end-plate rata, hard stamp K1 & cat ujung Biru." },
+      { idItem: "BOQ-OFC-03", bangunan: "Office", kodeItem: "B1", namaItem: "Balok Rafter & Tie Beam", section: "Struktur Utama", warna: "Biru", satuan: "Batang", target: 48, planW1: 4, planW2: 20, planW3: 38, planW4: 48, gambarUrl: "", catatanStandar: "Cek diameter lubang baut M16 sesuai mal, bersihkan slag las pada gusset plate." },
+      { idItem: "BOQ-OFC-04", bangunan: "Office", kodeItem: "ATP-01", namaItem: "Gording Atap Kanal C150", section: "Rangka Atap", warna: "Kuning", satuan: "Batang", target: 120, planW1: 0, planW2: 30, planW3: 85, planW4: 120, gambarUrl: "", catatanStandar: "Ikat per bundel maksimal 10 batang dengan strapping band, beri tanda arah TOP & cat Kuning." },
+      { idItem: "BOQ-OFC-05", bangunan: "Office", kodeItem: "MEP-01", namaItem: "Bracket & Support Tray MEP", section: "MEP & Aksesoris", warna: "Hijau", satuan: "Set", target: 40, planW1: 0, planW2: 12, planW3: 28, planW4: 40, gambarUrl: "", catatanStandar: "Cek lubang mounting dynabolt/baut, finishing cat anti karat & label hijau." },
+      { idItem: "BOQ-WKS-01", bangunan: "Workshop", kodeItem: "UMP-W1", namaItem: "Pedestal & Angkur Berat W1", section: "Struktur Bawah", warna: "Merah", satuan: "Set", target: 24, planW1: 12, planW2: 24, planW3: 24, planW4: 24, gambarUrl: "", catatanStandar: "Angkur M24 L-bolt lengkap dengan template mal & mur ganda." },
+      { idItem: "BOQ-WKS-02", bangunan: "Workshop", kodeItem: "KW1", namaItem: "Kolom Workshop WF 250x125", section: "Struktur Utama", warna: "Biru", satuan: "Batang", target: 24, planW1: 4, planW2: 14, planW3: 20, planW4: 24, gambarUrl: "", catatanStandar: "Cek kelurusan kolom, bracket dudukan hoist/pipa terlas penuh, hard stamp KW1." },
+      { idItem: "BOQ-WKS-03", bangunan: "Workshop", kodeItem: "BW1", namaItem: "Kuda-Kuda Bentang Lebar", section: "Struktur Utama", warna: "Biru", satuan: "Set", target: 32, planW1: 0, planW2: 12, planW3: 24, planW4: 32, gambarUrl: "", catatanStandar: "Trial assembly sambungan tengah di workshop sebelum dipacking, tandai kode kiri/kanan." },
+      { idItem: "BOQ-WKS-04", bangunan: "Workshop", kodeItem: "GRD-W1", namaItem: "Gording & Bracing Ikatan Angin", section: "Rangka Atap", warna: "Kuning", satuan: "Batang", target: 380, planW1: 30, planW2: 140, planW3: 280, planW4: 380, gambarUrl: "", catatanStandar: "Kitting per bundel @10 batang + turnbuckle & baut bracing dalam karung berlabel." },
+      { idItem: "BOQ-WKS-05", bangunan: "Workshop", kodeItem: "PNL-01", namaItem: "Frame Panel Listrik & Exhaust", section: "MEP & Aksesoris", warna: "Hijau", satuan: "Unit", target: 18, planW1: 0, planW2: 6, planW3: 14, planW4: 18, gambarUrl: "", catatanStandar: "Cek dimensi bukaan louver & dudukan panel distribusi, cat hijau & bungkus wrapping." }
+    ];
+
+    const defaultLogs = [
+      {
+        idLog: "LOG-1001", tagBundel: "OFC-UMP-A1-001", bangunan: "Office", kodeItem: "UMP-A1", namaItem: "Umpak & Angkur Tipe A1",
+        unitList: "001,002,003,004,005,006", qty: 6, minggu: "W1", statusQc: "OK",
+        catatanInspeksi: "Cek mal base plate & angkur M20 presisi, mur terikat",
+        fotoQcOk: "", fotoTemuanNg: "", fotoAfterRepair: "", catatanRepair: "",
+        diinputOleh: "Teknisi 1 (Fabrikasi) (2026-11-24 09:30)", statusApproval: "Approved",
+        approvedBy: "Project Manager (2026-11-24 11:00)", statusTracking: "Dalam Pengiriman",
+        noKontainer: "TEMU-884120", tglBerangkat: "2026-11-25", estimasiTiba: "2026-12-04",
+        fotoShipping: "", tglTerimaPapua: "", kondisiPapua: "", catatanPapua: "", fotoIncomingPapua: "", papuaBy: ""
+      },
+      {
+        idLog: "LOG-1002", tagBundel: "OFC-K1-001", bangunan: "Office", kodeItem: "K1", namaItem: "Kolom Utama WF 200x100",
+        unitList: "001,002,003,004,005,006", qty: 6, minggu: "W1", statusQc: "OK",
+        catatanInspeksi: "Hard stamp K1 & cat ujung Biru sesuai standar",
+        fotoQcOk: "", fotoTemuanNg: "", fotoAfterRepair: "", catatanRepair: "",
+        diinputOleh: "Teknisi 2 (Fabrikasi) (2026-11-24 14:15)", statusApproval: "Approved",
+        approvedBy: "Iqbal Romadona (Site Eng) (2026-11-24 16:00)", statusTracking: "Siap Kirim",
+        noKontainer: "", tglBerangkat: "", estimasiTiba: "",
+        fotoShipping: "", tglTerimaPapua: "", kondisiPapua: "", catatanPapua: "", fotoIncomingPapua: "", papuaBy: ""
+      },
+      {
+        idLog: "LOG-1003", tagBundel: "OFC-K1-002", bangunan: "Office", kodeItem: "K1", namaItem: "Kolom Utama WF 200x100",
+        unitList: "007,008", qty: 2, minggu: "W1", statusQc: "Rework",
+        catatanInspeksi: "Undercut pada las pelat kaki kolom 007 & 008, wajib las ulang",
+        fotoQcOk: "", fotoTemuanNg: "", fotoAfterRepair: "", catatanRepair: "",
+        diinputOleh: "Teknisi 1 (Fabrikasi) (2026-11-25 10:10)", statusApproval: "Rework",
+        approvedBy: "-", statusTracking: "Belum Siap",
+        noKontainer: "", tglBerangkat: "", estimasiTiba: "",
+        fotoShipping: "", tglTerimaPapua: "", kondisiPapua: "", catatanPapua: "", fotoIncomingPapua: "", papuaBy: ""
+      },
+      {
+        idLog: "LOG-1004", tagBundel: "WKS-KW1-001", bangunan: "Workshop", kodeItem: "KW1", namaItem: "Kolom Workshop WF 250x125",
+        unitList: "001,002,003,004", qty: 4, minggu: "W1", statusQc: "OK",
+        catatanInspeksi: "Kelurusan profil dan bracket hoist terlas penuh",
+        fotoQcOk: "", fotoTemuanNg: "", fotoAfterRepair: "", catatanRepair: "",
+        diinputOleh: "Teknisi 3 (Kitting & Label) (2026-11-25 13:20)", statusApproval: "Menunggu Approval",
+        approvedBy: "-", statusTracking: "Belum Siap",
+        noKontainer: "", tglBerangkat: "", estimasiTiba: "",
+        fotoShipping: "", tglTerimaPapua: "", kondisiPapua: "", catatanPapua: "", fotoIncomingPapua: "", papuaBy: ""
+      }
+    ];
+
+    let boqItems = JSON.parse(localStorage.getItem("tangguh_v2_boq")) || defaultBoqItems;
+    let logs = JSON.parse(localStorage.getItem("tangguh_v2_logs")) || defaultLogs;
+
+    // SVG Schematic Generator for Default Reference Drawings
+    function getDefaultSchematicSvg(kode, warna) {
+      const colorHex = { "Merah": "#dc2626", "Biru": "#2563eb", "Kuning": "#eab308", "Hijau": "#16a34a", "Putih": "#64748b" }[warna] || "#2563eb";
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180" viewBox="0 0 320 180">
+        <rect width="320" height="180" fill="#f8fafc"/>
+        <rect x="8" y="8" width="304" height="164" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+        <line x1="40" y1="145" x2="280" y2="145" stroke="#334155" stroke-width="2"/>
+        <rect x="125" y="32" width="70" height="113" fill="none" stroke="${colorHex}" stroke-width="3"/>
+        <line x1="160" y1="32" x2="160" y2="145" stroke="${colorHex}" stroke-width="1.5" stroke-dasharray="5 3"/>
+        <circle cx="138" cy="48" r="4" fill="#0f172a"/><circle cx="182" cy="48" r="4" fill="#0f172a"/>
+        <circle cx="138" cy="130" r="4" fill="#0f172a"/><circle cx="182" cy="130" r="4" fill="#0f172a"/>
+        <rect x="14" y="14" width="96" height="22" rx="4" fill="${colorHex}"/>
+        <text x="62" y="29" text-anchor="middle" font-family="Arial" font-size="11" font-weight="bold" fill="#fff">KODE: ${kode}</text>
+        <text x="160" y="164" text-anchor="middle" font-family="Arial" font-size="10" fill="#475569">STANDAR SHOP DRAWING • WARNA ${warna.toUpperCase()}</text>
+      </svg>`;
+      return "data:image/svg+xml;utf8," + encodeURIComponent(svg);
+    }
+
+    // ==================== INIT & AUTH ====================
+    window.addEventListener("DOMContentLoaded", async () => {
+      updateConnIndicators();
+      if (apiUrl) {
+        await syncFromCloud(true);
+      }
+      if (currentUser) {
+        enterApp();
+      }
+    });
+
+    function togglePassVisibility() {
+      const inp = document.getElementById("loginPass");
+      inp.type = inp.type === "password" ? "text" : "password";
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const u = document.getElementById("loginUser").value.trim().toLowerCase();
+      const p = document.getElementById("loginPass").value.trim();
+      const errBox = document.getElementById("loginErr");
+      errBox.style.display = "none";
+
+      if (apiUrl && masterUsers.length <= 5) {
+        await syncFromCloud(true);
+      }
+
+      const found = masterUsers.find(acc => acc.username.toLowerCase() === u && acc.sandi === p);
+      if (!found) {
+        errBox.style.display = "block";
+        return;
+      }
+
+      currentUser = found;
+      localStorage.setItem("tangguh_v2_user", JSON.stringify(currentUser));
+      enterApp();
+    }
+
+    function handleLogout() {
+      currentUser = null;
+      localStorage.removeItem("tangguh_v2_user");
+      document.getElementById("appShell").style.display = "none";
+      document.getElementById("loginScreen").style.display = "flex";
+      document.getElementById("loginPass").value = "";
+    }
+
+    function enterApp() {
+      document.getElementById("loginScreen").style.display = "none";
+      document.getElementById("appShell").style.display = "block";
+
+      document.getElementById("sbUserName").textContent = currentUser.nama;
+      const roleLabels = { "PM": "Project Manager (Approval)", "Site_Engineer": "Site Engineer (Full Access)", "Teknisi": "Teknisi Lapangan" };
+      document.getElementById("sbUserRole").textContent = roleLabels[currentUser.role] || currentUser.role;
+
+      // Reset building selection safely based on permissions
+      if (currentUser.role === "Teknisi" && activeBuilding === "Gabungan") {
+        activeBuilding = "Office";
+      }
+
+      renderBuildingSwitcher();
+      renderSidebarNav();
+      switchMenu("dashboard");
+    }
+
+    function updateConnIndicators() {
+      const isOnline = apiUrl && apiUrl.startsWith("http");
+      document.getElementById("loginConnStatus").textContent = isOnline ? "Status DB: Terhubung Cloud" : "Status DB: Mode Lokal";
+      const pill = document.getElementById("connPill");
+      const txt = document.getElementById("connPillText");
+      if (isOnline) {
+        pill.className = "conn-pill conn-online";
+        txt.textContent = "Terhubung Google Sheets";
+      } else {
+        pill.className = "conn-pill conn-local";
+        txt.textContent = "Mode Lokal (Offline Demo)";
+      }
+    }
+
+    // ==================== BUILDING SWITCHER & NAVIGATION ====================
+    function renderBuildingSwitcher() {
+      const canAll = currentUser.role === "PM" || currentUser.role === "Site_Engineer";
+      const options = [
+        { id: "Office", label: "Bangunan Office", tag: "OFC" },
+        { id: "Workshop", label: "Bangunan Workshop", tag: "WKS" }
+      ];
+      if (canAll) {
+        options.push({ id: "Gabungan", label: "Gabungan (Semua)", tag: "ALL" });
+      }
+
+      document.getElementById("bldgSwitcher").innerHTML = options.map(opt => `
+        <button class="bldg-btn ${activeBuilding === opt.id ? 'active' : ''}" onclick="setBuilding('${opt.id}')">
+          <span>${opt.label}</span>
+          <span class="bldg-tag">${opt.tag}</span>
+        </button>
+      `).join("");
+    }
+
+    function setBuilding(bldg) {
+      activeBuilding = bldg;
+      renderBuildingSwitcher();
+      refreshActiveView();
+    }
+
+    function renderSidebarNav() {
+      const scopedLogs = getScopedLogs();
+      const pendingApp = scopedLogs.filter(l => l.statusApproval === "Menunggu Approval").length;
+      const reworkCnt = scopedLogs.filter(l => l.statusApproval === "Rework").length;
+
+      const items = [
+        { id: "dashboard", label: "1. Dashboard & Kurva S", badge: "" },
+        { id: "doc", label: "2. Document Control", badge: "" },
+        {
+          id: "inspection",
+          label: currentUser.role === "PM" ? "3. Approval Jakarta" : "3. Input & Approval JKT",
+          badge: (pendingApp + reworkCnt) > 0 ? `${pendingApp + reworkCnt}` : "",
+          badgeCls: reworkCnt > 0 ? "" : "amber"
+        },
+        { id: "papua", label: "4. Shipping & QC Papua", badge: "" }
+      ];
+
+      if (currentUser.role === "PM" || currentUser.role === "Site_Engineer") {
+        items.push({ id: "pdf", label: "5. Cetak PDF Berbasis BOQ", badge: "" });
+      }
+
+      document.getElementById("sideNavMenu").innerHTML = items.map(it => `
+        <button class="nav-item ${activeMenu === it.id ? 'active' : ''}" onclick="switchMenu('${it.id}')">
+          <span>${it.label}</span>
+          ${it.badge ? `<span class="nav-badge ${it.badgeCls || ''}">${it.badge}</span>` : ""}
+        </button>
+      `).join("");
+    }
+
+    function switchMenu(menuId) {
+      activeMenu = menuId;
+      toggleSidebar(false);
+      renderSidebarNav();
+
+      const sections = {
+        dashboard: "secDashboard",
+        doc: "secDocControl",
+        inspection: "secInspection",
+        papua: "secPapua",
+        pdf: "secPdfBoq"
+      };
+      Object.keys(sections).forEach(k => {
+        document.getElementById(sections[k]).style.display = (k === menuId) ? "block" : "none";
+      });
+
+      const titles = {
+        dashboard: "Dashboard Monitoring & Kurva S",
+        doc: "Document Control — Referensi Gambar & Target BOQ",
+        inspection: currentUser.role === "PM" ? "Verifikasi & Approval Fabrikasi Jakarta" : "Input Inspeksi QA/QC & Approval Jakarta",
+        papua: "Tracking Pengiriman (Shipping) & QC Incoming Papua",
+        pdf: "Cetak Laporan Berita Acara Berdasarkan BOQ"
+      };
+      document.getElementById("topPageTitle").textContent = titles[menuId] || "Dashboard";
+      refreshActiveView();
+    }
+
+    function toggleSidebar(open) {
+      document.getElementById("sidebar").classList.toggle("open", open);
+      document.getElementById("sidebarOverlay").classList.toggle("show", open);
+    }
+
+    function getScopedBoq() {
+      if (activeBuilding === "Gabungan") return boqItems;
+      return boqItems.filter(b => b.bangunan === activeBuilding);
+    }
+
+    function getScopedLogs() {
+      if (activeBuilding === "Gabungan") return logs;
+      return logs.filter(l => l.bangunan === activeBuilding);
+    }
+
+    function refreshActiveView() {
+      const areaLabel = activeBuilding === "Gabungan" ? "Gabungan (Office + Workshop)" : `Bangunan ${activeBuilding}`;
+      document.getElementById("topPageSub").textContent = `Area aktif: ${areaLabel} • Login sebagai: ${currentUser.nama}`;
+      renderSidebarNav();
+
+      if (activeMenu === "dashboard") renderDashboard();
+      if (activeMenu === "doc") renderDocControl();
+      if (activeMenu === "inspection") setupInspectionView();
+      if (activeMenu === "papua") renderPapuaTracking();
+      if (activeMenu === "pdf") renderBoqPdfPreview();
+    }
+
+    // ==================== MENU 1: DASHBOARD & KURVA S ====================
+    function renderDashboard() {
+      const sBoq = getScopedBoq();
+      const sLogs = getScopedLogs();
+
+      const totalTarget = sBoq.reduce((s, b) => s + Number(b.target || 0), 0);
+      const totalOk = sLogs.filter(l => l.statusQc === "OK").reduce((s, l) => s + Number(l.qty || 0), 0);
+      const totalWaitApp = sLogs.filter(l => l.statusApproval === "Menunggu Approval").reduce((s, l) => s + Number(l.qty || 0), 0);
+      const totalAppJkt = sLogs.filter(l => l.statusApproval === "Approved").reduce((s, l) => s + Number(l.qty || 0), 0);
+      const totalRework = sLogs.filter(l => l.statusApproval === "Rework").reduce((s, l) => s + Number(l.qty || 0), 0);
+      const totalShipping = sLogs.filter(l => l.statusTracking === "Dalam Pengiriman").reduce((s, l) => s + Number(l.qty || 0), 0);
+      const totalPapua = sLogs.filter(l => l.statusTracking === "QC Incoming Papua").reduce((s, l) => s + Number(l.qty || 0), 0);
+      const belumInspeksi = Math.max(0, totalTarget - totalOk - totalRework);
+
+      document.getElementById("kpiGrid6").innerHTML = `
+        <div class="kpi-card">
+          <div class="kpi-lbl">Belum Terinspeksi</div>
+          <div class="kpi-val">${belumInspeksi}</div>
+          <div class="kpi-sub">Dari total ${totalTarget} target BOQ</div>
+        </div>
+        <div class="kpi-card amber">
+          <div class="kpi-lbl">Menunggu Approval</div>
+          <div class="kpi-val">${totalWaitApp}</div>
+          <div class="kpi-sub">Lolos QC, menunggu PM/SE</div>
+        </div>
+        <div class="kpi-card green">
+          <div class="kpi-lbl">Approved Jakarta</div>
+          <div class="kpi-val">${totalAppJkt}</div>
+          <div class="kpi-sub">${totalTarget > 0 ? ((totalAppJkt/totalTarget)*100).toFixed(1) : 0}% tervalidasi</div>
+        </div>
+        <div class="kpi-card red">
+          <div class="kpi-lbl">Rework (NG)</div>
+          <div class="kpi-val">${totalRework}</div>
+          <div class="kpi-sub">Sedang perbaikan workshop</div>
+        </div>
+        <div class="kpi-card blue">
+          <div class="kpi-lbl">Dalam Pengiriman</div>
+          <div class="kpi-val">${totalShipping}</div>
+          <div class="kpi-sub">Kontainer menuju Papua</div>
+        </div>
+        <div class="kpi-card purple">
+          <div class="kpi-lbl">QC Incoming Papua</div>
+          <div class="kpi-val">${totalPapua}</div>
+          <div class="kpi-sub">Diterima di Teluk Bintuni</div>
+        </div>
+      `;
+
+      renderSCurve(sBoq, sLogs);
+
+      // Rekap BOQ Table
+      const colorMap = { "Merah": "#dc2626", "Biru": "#2563eb", "Kuning": "#eab308", "Hijau": "#16a34a", "Putih": "#94a3b8" };
+      document.getElementById("dashBoqBody").innerHTML = sBoq.map(b => {
+        const iLogs = sLogs.filter(l => l.bangunan === b.bangunan && l.kodeItem === b.kodeItem);
+        const okQty = iLogs.filter(l => l.statusQc === "OK").reduce((s, l) => s + Number(l.qty || 0), 0);
+        const appQty = iLogs.filter(l => l.statusApproval === "Approved").reduce((s, l) => s + Number(l.qty || 0), 0);
+        const waitQty = iLogs.filter(l => l.statusApproval === "Menunggu Approval").reduce((s, l) => s + Number(l.qty || 0), 0);
+        const rwQty = iLogs.filter(l => l.statusApproval === "Rework").reduce((s, l) => s + Number(l.qty || 0), 0);
+        const papuaQty = iLogs.filter(l => l.statusTracking === "QC Incoming Papua").reduce((s, l) => s + Number(l.qty || 0), 0);
+        const sisa = Math.max(0, Number(b.target) - okQty);
+
+        const t = Number(b.target) || 1;
+        const pApp = Math.min(100, (appQty / t) * 100);
+        const pWait = Math.min(100 - pApp, (waitQty / t) * 100);
+        const pRw = Math.min(100 - pApp - pWait, (rwQty / t) * 100);
+
+        return `
+          <tr>
+            <td><span class="pill ${b.bangunan === 'Office' ? 'pill-blue' : 'pill-purple'}">${b.bangunan}</span></td>
+            <td><strong>${b.kodeItem}</strong></td>
+            <td>${b.namaItem}</td>
+            <td><span style="display:inline-flex; align-items:center; gap:5px; font-weight:600;"><span style="width:10px; height:10px; border-radius:2px; background:${colorMap[b.warna] || '#64748b'};"></span>${b.warna}</span></td>
+            <td class="text-right"><strong>${b.target}</strong> ${b.satuan}</td>
+            <td class="text-right" style="color:var(--green); font-weight:700;">${okQty}</td>
+            <td class="text-right" style="color:var(--green-dark); font-weight:700;">${appQty}</td>
+            <td class="text-right" style="color:${rwQty > 0 ? 'var(--red)' : 'var(--slate-400)'}; font-weight:700;">${rwQty}</td>
+            <td class="text-right" style="color:var(--purple); font-weight:700;">${papuaQty}</td>
+            <td class="text-right" style="color:${sisa > 0 ? 'var(--amber)' : 'var(--green)'}; font-weight:700;">${sisa}</td>
+            <td>
+              <div class="stacked-bar" title="Approved: ${appQty}, Menunggu: ${waitQty}, Rework: ${rwQty}">
+                <div class="sb-app" style="width:${pApp}%"></div>
+                <div class="sb-wait" style="width:${pWait}%"></div>
+                <div class="sb-rw" style="width:${pRw}%"></div>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function setCurveMode(mode) {
+      curveMode = mode;
+      renderDashboard();
+    }
+
+    function renderSCurve(sBoq, sLogs) {
+      const totalTarget = sBoq.reduce((s, b) => s + Number(b.target || 0), 0) || 1;
+      const planQty = [
+        sBoq.reduce((s, b) => s + Number(b.planW1 || 0), 0),
+        sBoq.reduce((s, b) => s + Number(b.planW2 || 0), 0),
+        sBoq.reduce((s, b) => s + Number(b.planW3 || 0), 0),
+        sBoq.reduce((s, b) => s + Number(b.planW4 || 0), 0)
+      ];
+
+      const weeks = ["W1", "W2", "W3", "W4"];
+      let cum = 0;
+      const actualQty = weeks.map(w => {
+        const wOk = sLogs.filter(l => l.minggu === w && l.statusQc === "OK").reduce((s, l) => s + Number(l.qty || 0), 0);
+        cum += wOk;
+        return cum;
+      });
+
+      const planPct = planQty.map(q => Number(((q / totalTarget) * 100).toFixed(1)));
+      const actualPct = actualQty.map(q => Number(((q / totalTarget) * 100).toFixed(1)));
+
+      // Determine latest active week for ON TRACK / DELAY badge
+      let activeIdx = 0;
+      weeks.forEach((w, idx) => {
+        if (sLogs.some(l => l.minggu === w)) activeIdx = idx;
+      });
+      const latestDevPct = Number((actualPct[activeIdx] - planPct[activeIdx]).toFixed(1));
+      const badgeEl = document.getElementById("scurveStatusBadge");
+      if (latestDevPct >= 0) {
+        badgeEl.className = "pill pill-green";
+        badgeEl.textContent = `ON TRACK (+${latestDevPct}% di ${weeks[activeIdx]})`;
+      } else {
+        badgeEl.className = "pill pill-red";
+        badgeEl.textContent = `DELAY (${latestDevPct}% di ${weeks[activeIdx]})`;
+      }
+
+      const pVals = curveMode === "pct" ? planPct : planQty;
+      const aVals = curveMode === "pct" ? actualPct : actualQty;
+      const maxY = curveMode === "pct" ? 100 : Math.max(totalTarget, ...pVals, ...aVals, 10);
+      const suf = curveMode === "pct" ? "%" : "";
+
+      const W = 720, H = 220, padL = 50, padR = 25, padT = 22, padB = 34;
+      const plotW = W - padL - padR;
+      const plotH = H - padT - padB;
+      const xPos = i => padL + ((i + 1) / 4) * plotW;
+      const yPos = v => padT + plotH - (Math.min(v, maxY) / maxY) * plotH;
+
+      let grid = "";
+      for (let i = 0; i <= 4; i++) {
+        const v = (maxY / 4) * i;
+        const y = yPos(v);
+        grid += `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="#e2e8f0" stroke-dasharray="4 3"/>`;
+        grid += `<text x="${padL - 8}" y="${y + 4}" text-anchor="end" font-size="11" fill="#64748b">${Math.round(v)}${suf}</text>`;
+      }
+
+      const pPts = [[padL, yPos(0)], ...pVals.map((v, i) => [xPos(i), yPos(v)])];
+      const aPts = [[padL, yPos(0)], ...aVals.map((v, i) => [xPos(i), yPos(v)])];
+      const pPath = pPts.map((pt, i) => `${i === 0 ? 'M' : 'L'} ${pt[0]} ${pt[1]}`).join(" ");
+      const aPath = aPts.map((pt, i) => `${i === 0 ? 'M' : 'L'} ${pt[0]} ${pt[1]}`).join(" ");
+
+      let markers = "";
+      weeks.forEach((w, i) => {
+        const px = xPos(i), py = yPos(pVals[i]), ay = yPos(aVals[i]);
+        markers += `<text x="${px}" y="${H - 10}" text-anchor="middle" font-size="11" font-weight="700" fill="#334155">Minggu ${i+1} (${w})</text>`;
+        markers += `<circle cx="${px}" cy="${py}" r="4.5" fill="#64748b"/>`;
+        markers += `<text x="${px}" y="${py - 9}" text-anchor="middle" font-size="10.5" fill="#475569">${pVals[i]}${suf}</text>`;
+        markers += `<circle cx="${px}" cy="${ay}" r="5.5" fill="#16a34a" stroke="#fff" stroke-width="1.5"/>`;
+        markers += `<text x="${px}" y="${ay + 16}" text-anchor="middle" font-size="11" font-weight="700" fill="#15803d">${aVals[i]}${suf}</text>`;
+      });
+
+      document.getElementById("scurveSvgWrap").innerHTML = `
+        <svg viewBox="0 0 ${W} ${H}" style="width:100%; max-width:820px; height:auto; display:block;">
+          ${grid}
+          <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H - padB}" stroke="#94a3b8"/>
+          <line x1="${padL}" y1="${H - padB}" x2="${W - padR}" y2="${H - padB}" stroke="#94a3b8"/>
+          <path d="${pPath}" fill="none" stroke="#64748b" stroke-width="2.5" stroke-dasharray="6 4"/>
+          <path d="${aPath}" fill="none" stroke="#16a34a" stroke-width="3"/>
+          ${markers}
+        </svg>
+      `;
+
+      const devs = aVals.map((a, i) => Number((a - pVals[i]).toFixed(1)));
+      document.getElementById("scurveTableBody").innerHTML = `
+        <tr>
+          <td><strong>Rencana Kumulatif (Plan)</strong></td>
+          ${pVals.map(v => `<td class="text-center">${v}${suf}</td>`).join("")}
+        </tr>
+        <tr>
+          <td><strong style="color:var(--green-dark);">Aktual Kumulatif (Lolos QA/QC)</strong></td>
+          ${aVals.map(v => `<td class="text-center" style="color:var(--green-dark); font-weight:700;">${v}${suf}</td>`).join("")}
+        </tr>
+        <tr>
+          <td><strong>Deviasi (Aktual - Plan)</strong></td>
+          ${devs.map(d => `<td class="text-center" style="color:${d >= 0 ? 'var(--green)' : 'var(--red)'}; font-weight:700;">${d >= 0 ? '+' : ''}${d}${suf}</td>`).join("")}
+        </tr>
+      `;
+    }
+
+    // ==================== MENU 2: DOCUMENT CONTROL ====================
+    function renderDocControl() {
+      const canEdit = currentUser.kelolaDocBoq === true;
+      document.getElementById("btnAddBoqDoc").style.display = canEdit ? "inline-flex" : "none";
+
+      const sBoq = getScopedBoq();
+      document.getElementById("docControlCards").innerHTML = sBoq.map(b => {
+        const imgSrc = b.gambarUrl || getDefaultSchematicSvg(b.kodeItem, b.warna);
+        return `
+          <div class="card" style="margin-bottom:0; display:flex; flex-direction:column; justify-content:space-between;">
+            <div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span class="pill ${b.bangunan === 'Office' ? 'pill-blue' : 'pill-purple'}">${b.bangunan} • ${b.kodeItem}</span>
+                <span class="pill pill-gray">Warna: ${b.warna}</span>
+              </div>
+              <img src="${imgSrc}" alt="${b.kodeItem}" style="width:100%; height:150px; object-fit:contain; background:#f8fafc; border:1px solid var(--border); border-radius:7px; margin-bottom:8px;" />
+              <div style="font-weight:800; font-size:0.9rem; color:var(--navy);">${b.namaItem}</div>
+              <div style="font-size:0.75rem; color:var(--slate-500); margin-bottom:6px;">Section: ${b.section} • Target BOQ: <strong>${b.target} ${b.satuan}</strong></div>
+              <div style="font-size:0.77rem; background:var(--slate-50); border:1px solid var(--slate-200); padding:7px 9px; border-radius:6px; color:var(--slate-700);">
+                ${b.catatanStandar || "Belum ada catatan standar."}
+              </div>
+            </div>
+            ${canEdit ? `<button class="btn btn-light btn-sm" style="width:100%; margin-top:10px;" onclick="openBoqModal('${b.idItem}')">Edit Target BOQ / Upload Gambar</button>` : ""}
+          </div>
+        `;
+      }).join("");
+    }
+
+    // ==================== MENU 3: INPUT INSPEKSI (STAGE 2) & APPROVAL ====================
+    function setupInspectionView() {
+      const canInput = currentUser.bisaInput === true;
+      document.getElementById("workshopInputCard").style.display = canInput ? "block" : "none";
+      document.getElementById("pmNoticeBanner").style.display = currentUser.role === "PM" ? "block" : "none";
+
+      if (canInput) {
+        const bSel = document.getElementById("fInspBangunan");
+        if (activeBuilding === "Office" || activeBuilding === "Workshop") {
+          bSel.value = activeBuilding;
+          bSel.disabled = true;
+        } else {
+          bSel.disabled = false;
+        }
+        onInspBuildingChange();
+      }
+      renderInspectionTables();
+    }
+
+    function onInspBuildingChange() {
+      const bldg = document.getElementById("fInspBangunan").value;
+      const items = boqItems.filter(b => b.bangunan === bldg);
+      const kSel = document.getElementById("fInspKode");
+      kSel.innerHTML = items.map(it => `<option value="${it.kodeItem}">${it.kodeItem} — ${it.namaItem} (Target: ${it.target} ${it.satuan})</option>`).join("");
+      onInspItemChange();
+    }
+
+    function onInspItemChange() {
+      const bldg = document.getElementById("fInspBangunan").value;
+      const kode = document.getElementById("fInspKode").value;
+      const item = boqItems.find(b => b.bangunan === bldg && b.kodeItem === kode);
+      if (!item) return;
+
+      // Update Document Control Linear Reference
+      document.getElementById("inspRefImg").src = item.gambarUrl || getDefaultSchematicSvg(item.kodeItem, item.warna);
+      document.getElementById("inspRefTitle").textContent = `${item.kodeItem} — ${item.namaItem}`;
+      document.getElementById("inspRefMeta").textContent = `Bangunan: ${item.bangunan} | Warna Modul: ${item.warna} | Target BOQ: ${item.target} ${item.satuan}`;
+      document.getElementById("inspRefNote").textContent = item.catatanStandar || "Periksa dimensi, kelurusan, las, lubang baut & label.";
+
+      // Auto-generate next 3-digit Bundle Tag
+      const prefix = (bldg === "Office" ? "OFC" : "WKS") + "-" + kode + "-";
+      const existingNums = logs
+        .filter(l => l.tagBundel && l.tagBundel.startsWith(prefix))
+        .map(l => parseInt(l.tagBundel.replace(prefix, ""), 10))
+        .filter(n => !isNaN(n));
+      const nextNum = existingNums.length > 0 ? Math.max(...existingNums) + 1 : 1;
+      const nextTag = prefix + String(nextNum).padStart(3, "0");
+      document.getElementById("nextBundleBadge").textContent = `Tag Berikutnya: ${nextTag}`;
+      document.getElementById("nextBundleBadge").dataset.tag = nextTag;
+
+      // Reset unit selection & build range pills
+      selectedUnits.clear();
+      activeUnitRangeStart = 1;
+      document.getElementById("unitSearchInp").value = "";
+      buildUnitRangePills(Number(item.target));
+      renderUnitGrid();
+    }
+
+    function getUnitStatusMap(bldg, kode) {
+      const map = {};
+      logs.filter(l => l.bangunan === bldg && l.kodeItem === kode).forEach(l => {
+        const units = String(l.unitList || "").split(",").map(s => s.trim()).filter(Boolean);
+        units.forEach(u => {
+          if (l.statusApproval === "Rework" || l.statusQc === "Rework") {
+            map[u] = "rework";
+          } else {
+            map[u] = "done";
+          }
+        });
+      });
+      return map;
+    }
+
+    function buildUnitRangePills(total) {
+      const wrap = document.getElementById("unitRangePills");
+      if (total <= 100) {
+        wrap.innerHTML = "";
+        return;
+      }
+      let html = "";
+      for (let start = 1; start <= total; start += 100) {
+        const end = Math.min(total, start + 99);
+        const sStr = String(start).padStart(3, "0");
+        const eStr = String(end).padStart(3, "0");
+        html += `<button type="button" class="range-pill ${activeUnitRangeStart === start ? 'active' : ''}" onclick="setUnitRange(${start}, ${total})">${sStr}–${eStr}</button>`;
+      }
+      wrap.innerHTML = html;
+    }
+
+    function setUnitRange(start, total) {
+      activeUnitRangeStart = start;
+      buildUnitRangePills(total);
+      renderUnitGrid();
+    }
+
+    function renderUnitGrid() {
+      const bldg = document.getElementById("fInspBangunan").value;
+      const kode = document.getElementById("fInspKode").value;
+      const item = boqItems.find(b => b.bangunan === bldg && b.kodeItem === kode);
+      if (!item) return;
+
+      const total = Number(item.target) || 0;
+      const statusMap = getUnitStatusMap(bldg, kode);
+      const q = document.getElementById("unitSearchInp").value.trim();
+
+      let start = 1, end = total;
+      if (q) {
+        start = 1; end = total;
+      } else if (total > 100) {
+        start = activeUnitRangeStart;
+        end = Math.min(total, start + 99);
+      }
+
+      let html = "";
+      for (let i = start; i <= end; i++) {
+        const numStr = String(i).padStart(3, "0");
+        if (q && !numStr.includes(q)) continue;
+        const st = statusMap[numStr];
+        if (st === "done") {
+          html += `<button type="button" class="u-btn done" disabled title="Sudah OK / Approved">${numStr}</button>`;
+        } else if (st === "rework") {
+          html += `<button type="button" class="u-btn rework" disabled title="Status Rework">${numStr}</button>`;
+        } else {
+          const isSel = selectedUnits.has(numStr);
+          html += `<button type="button" class="u-btn ${isSel ? 'selected' : ''}" onclick="toggleUnit('${numStr}')">${numStr}</button>`;
+        }
+      }
+      document.getElementById("unitGridContainer").innerHTML = html || `<div style="font-size:0.78rem; color:var(--slate-500);">Nomor tidak ditemukan.</div>`;
+      updateSelectedUnitSummary(item.satuan);
+    }
+
+    function toggleUnit(numStr) {
+      if (selectedUnits.has(numStr)) selectedUnits.delete(numStr);
+      else selectedUnits.add(numStr);
+      renderUnitGrid();
+    }
+
+    function selectNextAvailableUnits(count) {
+      const bldg = document.getElementById("fInspBangunan").value;
+      const kode = document.getElementById("fInspKode").value;
+      const item = boqItems.find(b => b.bangunan === bldg && b.kodeItem === kode);
+      if (!item) return;
+      const total = Number(item.target) || 0;
+      const statusMap = getUnitStatusMap(bldg, kode);
+
+      let added = 0;
+      for (let i = 1; i <= total && added < count; i++) {
+        const numStr = String(i).padStart(3, "0");
+        if (!statusMap[numStr] && !selectedUnits.has(numStr)) {
+          selectedUnits.add(numStr);
+          added++;
+        }
+      }
+      renderUnitGrid();
+    }
+
+    function clearSelectedUnits() {
+      selectedUnits.clear();
+      renderUnitGrid();
+    }
+
+    function updateSelectedUnitSummary(satuan) {
+      const arr = Array.from(selectedUnits).sort();
+      const el = document.getElementById("selectedUnitSummary");
+      if (arr.length === 0) {
+        el.textContent = "0 Unit Dipilih";
+      } else {
+        const preview = arr.length <= 6 ? arr.join(", ") : `${arr[0]} s/d ${arr[arr.length - 1]}`;
+        el.textContent = `${arr.length} ${satuan || 'Unit'} Dipilih (${preview})`;
+      }
+    }
+
+    // Submit Inspection Form
+    async function submitInspectionForm(e) {
+      e.preventDefault();
+      const unitsArr = Array.from(selectedUnits).sort();
+      if (unitsArr.length === 0) {
+        alert("Silakan pilih minimal 1 nomor unit pada kotak pilihan unit terlebih dahulu!");
+        return;
+      }
+      if (!capturedPhotos.insp) {
+        alert("Wajib mengambil foto bukti fisik & label menggunakan kamera terlebih dahulu!");
+        return;
+      }
+
+      const btn = document.getElementById("btnSubmitInsp");
+      btn.disabled = true;
+      btn.textContent = "Menyimpan & Mengunggah Foto...";
+
+      const bldg = document.getElementById("fInspBangunan").value;
+      const kode = document.getElementById("fInspKode").value;
+      const item = boqItems.find(b => b.bangunan === bldg && b.kodeItem === kode);
+      const tagBundel = document.getElementById("nextBundleBadge").dataset.tag;
+      const statusQc = document.getElementById("fInspStatusQc").value;
+      const minggu = document.getElementById("fInspMinggu").value;
+      const catatan = document.getElementById("fInspCatatan").value.trim();
+
+      const now = new Date();
+      const pad = n => String(n).padStart(2, "0");
+      const nowStr = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+
+      const newLog = {
+        idLog: "LOG-" + Date.now(),
+        tagBundel,
+        bangunan: bldg,
+        kodeItem: kode,
+        namaItem: item ? item.namaItem : kode,
+        unitList: unitsArr.join(","),
+        qty: unitsArr.length,
+        minggu,
+        statusQc,
+        catatanInspeksi: catatan,
+        fotoQcOk: statusQc === "OK" ? capturedPhotos.insp : "",
+        fotoTemuanNg: statusQc === "Rework" ? capturedPhotos.insp : "",
+        fotoAfterRepair: "",
+        catatanRepair: "",
+        diinputOleh: `${currentUser.nama} (${nowStr})`,
+        statusApproval: statusQc === "Rework" ? "Rework" : "Menunggu Approval",
+        approvedBy: "-",
+        statusTracking: "Belum Siap",
+        noKontainer: "", tglBerangkat: "", estimasiTiba: "", fotoShipping: "",
+        tglTerimaPapua: "", kondisiPapua: "", catatanPapua: "", fotoIncomingPapua: "", papuaBy: ""
+      };
+
+      if (apiUrl && apiUrl.startsWith("http")) {
+        try {
+          const res = await fetch(apiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({
+              action: "addInspection",
+              tagBundel,
+              bangunan: bldg,
+              kodeItem: kode,
+              namaItem: newLog.namaItem,
+              unitList: newLog.unitList,
+              qty: newLog.qty,
+              minggu,
+              statusQc,
+              catatanInspeksi: catatan,
+              fotoBase64: capturedPhotos.insp,
+              userName: currentUser.nama
+            })
+          });
+          const data = await res.json();
+          if (data.status === "success") {
+            newLog.idLog = data.idLog || newLog.idLog;
+            if (data.fotoQcOk) newLog.fotoQcOk = data.fotoQcOk;
+            if (data.fotoTemuanNg) newLog.fotoTemuanNg = data.fotoTemuanNg;
+          }
+        } catch (err) {
+          console.warn("Offline fallback save:", err);
+        }
+      }
+
+      logs.unshift(newLog);
+      saveLocalAll();
+
+      // Reset form
+      document.getElementById("fInspCatatan").value = "";
+      capturedPhotos.insp = "";
+      const prev = document.getElementById("inspPhotoPreview");
+      prev.src = ""; prev.style.display = "none";
+
+      alert(`Tersimpan! Silakan tulis/tempel Tag Bundel fisik: ${tagBundel}`);
+      onInspItemChange();
+      renderInspectionTables();
+      renderSidebarNav();
+
+      btn.disabled = false;
+      btn.textContent = "Simpan Hasil Inspeksi & Terbitkan Tag Bundel";
+    }
+
+    function renderInspectionTables() {
+      const sLogs = getScopedLogs();
+
+      // 1. Antrean Rework
+      const rwList = sLogs.filter(l => l.statusApproval === "Rework");
+      document.getElementById("reworkTableBody").innerHTML = rwList.length === 0
+        ? `<tr><td colspan="6" class="text-center" style="color:var(--slate-500); padding:14px;">Tidak ada item dalam antrean rework.</td></tr>`
+        : rwList.map(l => `
+          <tr>
+            <td><strong>${l.tagBundel}</strong></td>
+            <td>${l.bangunan} • <strong>${l.kodeItem}</strong></td>
+            <td><span class="pill pill-red">${l.unitList} (${l.qty})</span></td>
+            <td style="font-size:0.78rem;">${l.catatanInspeksi || "-"}</td>
+            <td class="text-center">
+              ${l.fotoTemuanNg ? `<button class="btn btn-light btn-sm" onclick="openPhotoTrail('${l.idLog}')">Lihat Foto NG</button>` : `<span style="font-size:0.72rem; color:#94a3b8;">-</span>`}
+            </td>
+            <td class="text-center">
+              ${currentUser.bisaInput
+                ? `<button class="btn btn-warning btn-sm" onclick="openReworkModal('${l.idLog}')">Selesai Perbaikan</button>`
+                : `<span class="pill pill-red">Menunggu Perbaikan Teknisi</span>`}
+            </td>
+          </tr>
+        `).join("");
+
+      // 2. Log Inspeksi & Approval
+      const filterApp = document.getElementById("filterLogApproval").value;
+      const filtered = sLogs.filter(l => filterApp === "ALL" || l.statusApproval === filterApp);
+
+      document.getElementById("logJakartaBody").innerHTML = filtered.length === 0
+        ? `<tr><td colspan="7" class="text-center" style="color:var(--slate-500); padding:16px;">Belum ada data log inspeksi pada filter ini.</td></tr>`
+        : filtered.map(l => {
+          let pillCls = "pill-amber";
+          if (l.statusApproval === "Approved") pillCls = "pill-green";
+          if (l.statusApproval === "Rework") pillCls = "pill-red";
+
+          const hasAnyPhoto = l.fotoQcOk || l.fotoTemuanNg || l.fotoAfterRepair;
+          return `
+            <tr>
+              <td>
+                <div style="font-weight:800; color:var(--navy);">${l.tagBundel}</div>
+                <span class="pill pill-blue">${l.minggu}</span>
+              </td>
+              <td>
+                <div style="font-weight:700;">${l.bangunan} — ${l.kodeItem}</div>
+                <div style="font-size:0.74rem; color:var(--slate-500);">${l.namaItem}</div>
+              </td>
+              <td>
+                <div style="font-weight:700;">${l.qty} Unit</div>
+                <div style="font-size:0.72rem; color:var(--slate-500); max-width:130px; word-break:break-all;">${l.unitList}</div>
+              </td>
+              <td style="max-width:210px; font-size:0.77rem;">
+                <div>${l.catatanInspeksi || "-"}</div>
+                ${l.catatanRepair ? `<div style="color:var(--green-dark); margin-top:2px;"><strong>Perbaikan:</strong> ${l.catatanRepair}</div>` : ""}
+                <div style="color:var(--slate-500); font-size:0.7rem; margin-top:3px;">Input: ${l.diinputOleh}</div>
+              </td>
+              <td class="text-center">
+                ${hasAnyPhoto
+                  ? `<button class="btn btn-light btn-sm" onclick="openPhotoTrail('${l.idLog}')">Lihat Foto (${[l.fotoQcOk, l.fotoTemuanNg, l.fotoAfterRepair].filter(Boolean).length})</button>`
+                  : `<span style="font-size:0.72rem; color:#94a3b8;">Demo (No Img)</span>`}
+              </td>
+              <td>
+                <span class="pill ${pillCls}">${l.statusApproval}</span>
+                ${l.approvedBy && l.approvedBy !== "-" ? `<div style="font-size:0.7rem; color:var(--slate-500); margin-top:3px;">${l.approvedBy}</div>` : ""}
+              </td>
+              <td class="text-center">
+                ${currentUser.bisaApprove
+                  ? `<button class="btn ${l.statusApproval === 'Approved' ? 'btn-light' : 'btn-success'} btn-sm" onclick="openApproveModal('${l.idLog}')">${l.statusApproval === 'Approved' ? 'Ubah' : 'Approve'}</button>`
+                  : `<span style="font-size:0.72rem; color:var(--slate-400);">Terkunci</span>`}
+              </td>
+            </tr>
+          `;
+        }).join("");
+    }
+
+    // Rework Resolution Modal
+    function openReworkModal(idLog) {
+      const log = logs.find(l => l.idLog === idLog);
+      if (!log) return;
+      document.getElementById("rwLogId").value = idLog;
+      document.getElementById("rwModalDesc").textContent = `Tag: ${log.tagBundel} (${log.bangunan} — ${log.kodeItem}, Unit: ${log.unitList})`;
+      document.getElementById("rwOldNgNote").textContent = `Temuan NG: ${log.catatanInspeksi || "-"}`;
+      const oldImg = document.getElementById("rwOldNgImg");
+      if (log.fotoTemuanNg) {
+        oldImg.src = log.fotoTemuanNg;
+        oldImg.style.display = "block";
+      } else {
+        oldImg.style.display = "none";
+      }
+      document.getElementById("rwRepairNote").value = "";
+      capturedPhotos.rework = "";
+      const prev = document.getElementById("rwPhotoPreview");
+      prev.src = ""; prev.style.display = "none";
+      document.getElementById("reworkModal").classList.add("show");
+    }
+
+    async function submitReworkResolution() {
+      const idLog = document.getElementById("rwLogId").value;
+      const note = document.getElementById("rwRepairNote").value.trim();
+      if (!note) { alert("Isi catatan hasil perbaikan terlebih dahulu."); return; }
+      if (!capturedPhotos.rework) { alert("Wajib mengambil foto setelah perbaikan (After Repair)."); return; }
+
+      const btn = document.getElementById("btnSubmitRework");
+      btn.disabled = true; btn.textContent = "Menyimpan...";
+
+      const now = new Date();
+      const pad = n => String(n).padStart(2, "0");
+      const nowStr = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+
+      const idx = logs.findIndex(l => l.idLog === idLog);
+      if (idx > -1) {
+        logs[idx].statusQc = "OK";
+        logs[idx].fotoQcOk = capturedPhotos.rework;
+        logs[idx].fotoAfterRepair = capturedPhotos.rework;
+        logs[idx].catatanRepair = `${note} — oleh ${currentUser.nama} (${nowStr})`;
+        logs[idx].statusApproval = "Menunggu Approval";
+      }
+
+      if (apiUrl && apiUrl.startsWith("http")) {
+        try {
+          const res = await fetch(apiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({
+              action: "resolveRework",
+              idLog,
+              catatanRepair: note,
+              fotoBase64: capturedPhotos.rework,
+              userName: currentUser.nama
+            })
+          });
+          const data = await res.json();
+          if (data.status === "success" && data.fotoAfterRepair && idx > -1) {
+            logs[idx].fotoAfterRepair = data.fotoAfterRepair;
+            logs[idx].fotoQcOk = data.fotoAfterRepair;
+          }
+        } catch (e) { console.warn(e); }
+      }
+
+      saveLocalAll();
+      btn.disabled = false; btn.textContent = "Simpan Hasil Perbaikan";
+      closeModal("reworkModal");
+      renderInspectionTables();
+      renderSidebarNav();
+    }
+
+    // Approval Modal
+    function openApproveModal(idLog) {
+      const log = logs.find(l => l.idLog === idLog);
+      if (!log) return;
+      document.getElementById("appLogId").value = idLog;
+      document.getElementById("appModalDesc").textContent = `Tag Bundel: ${log.tagBundel} | ${log.bangunan} — ${log.kodeItem} (${log.qty} Unit)`;
+      document.getElementById("appUserLabel").textContent = currentUser.nama;
+      document.getElementById("approveModal").classList.add("show");
+    }
+
+    async function submitApproval() {
+      const idLog = document.getElementById("appLogId").value;
+      const dec = document.getElementById("appDecision").value;
+      const btn = document.getElementById("btnConfirmApp");
+      btn.disabled = true; btn.textContent = "Memproses...";
+
+      const now = new Date();
+      const pad = n => String(n).padStart(2, "0");
+      const nowStr = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+
+      const idx = logs.findIndex(l => l.idLog === idLog);
+      if (idx > -1) {
+        logs[idx].statusApproval = dec;
+        logs[idx].approvedBy = `${currentUser.nama} (${nowStr})`;
+        if (dec === "Approved") {
+          logs[idx].statusQc = "OK";
+          if (!logs[idx].statusTracking || logs[idx].statusTracking === "Belum Siap") {
+            logs[idx].statusTracking = "Siap Kirim";
+          }
+        } else if (dec === "Rework") {
+          logs[idx].statusQc = "Rework";
+          logs[idx].statusTracking = "Belum Siap";
+        }
+      }
+
+      if (apiUrl && apiUrl.startsWith("http")) {
+        try {
+          await fetch(apiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({
+              action: "approveLog",
+              idLog,
+              statusApproval: dec,
+              approverName: currentUser.nama
+            })
+          });
+        } catch (e) { console.warn(e); }
+      }
+
+      saveLocalAll();
+      btn.disabled = false; btn.textContent = "Konfirmasi Keputusan";
+      closeModal("approveModal");
+      renderInspectionTables();
+      renderSidebarNav();
+    }
+
+    // ==================== MENU 4: SHIPPING & QC INCOMING PAPUA (STAGE 3) ====================
+    function renderPapuaTracking() {
+      const sLogs = getScopedLogs().filter(l => l.statusApproval === "Approved" || l.statusTracking === "Dalam Pengiriman" || l.statusTracking === "QC Incoming Papua");
+      const stageFilter = document.getElementById("filterTrackingStage").value;
+
+      const cSiap = sLogs.filter(l => l.statusTracking === "Siap Kirim").length;
+      const cShip = sLogs.filter(l => l.statusTracking === "Dalam Pengiriman").length;
+      const cPapua = sLogs.filter(l => l.statusTracking === "QC Incoming Papua").length;
+
+      document.getElementById("cntSiapKirim").textContent = cSiap;
+      document.getElementById("cntShipping").textContent = cShip;
+      document.getElementById("cntPapuaDone").textContent = cPapua;
+
+      document.getElementById("btnBatchShipping").style.display = currentUser.bisaInput ? "inline-flex" : "none";
+
+      const filtered = sLogs.filter(l => stageFilter === "ALL" || l.statusTracking === stageFilter);
+
+      document.getElementById("trackingTableBody").innerHTML = filtered.length === 0
+        ? `<tr><td colspan="9" class="text-center" style="padding:18px; color:var(--slate-500);">Belum ada bundel Approved yang siap dikirim atau sedang dalam tracking.</td></tr>`
+        : filtered.map(l => {
+          const isSiap = l.statusTracking === "Siap Kirim";
+          const isShip = l.statusTracking === "Dalam Pengiriman";
+          const isDone = l.statusTracking === "QC Incoming Papua";
+
+          let stPill = `<span class="pill pill-green">1. Siap Kirim (Approved JKT)</span>`;
+          if (isShip) stPill = `<span class="pill pill-blue">2. Dalam Pengiriman</span>`;
+          if (isDone) stPill = `<span class="pill pill-purple">3. QC Incoming Papua (Diterima)</span>`;
+
+          const shipInfo = l.noKontainer
+            ? `<div><strong>${l.noKontainer}</strong></div><div style="font-size:0.72rem; color:var(--slate-500);">Brkt: ${l.tglBerangkat} | Est: ${l.estimasiTiba || '-'}</div>`
+            : `<span style="font-size:0.74rem; color:#94a3b8;">Menunggu jadwal kontainer</span>`;
+
+          const papuaInfo = isDone
+            ? `<span class="pill ${l.kondisiPapua === 'Lengkap & Mulus' ? 'pill-green' : 'pill-amber'}">${l.kondisiPapua}</span><div style="font-size:0.72rem; color:var(--slate-600); margin-top:2px;">Tgl: ${l.tglTerimaPapua} • ${l.catatanPapua || '-'}</div>`
+            : `<span style="font-size:0.74rem; color:#94a3b8;">Belum diterima di site</span>`;
+
+          let actionBtn = `<span style="font-size:0.72rem; color:var(--slate-500);">Selesai</span>`;
+          if (currentUser.bisaInput) {
+            if (isSiap) {
+              actionBtn = `<button class="btn btn-primary btn-sm" onclick="openSingleShipping('${l.idLog}')">Kirim</button>`;
+            } else if (isShip) {
+              actionBtn = `<button class="btn btn-success btn-sm" onclick="openPapuaIncomingModal('${l.idLog}')">QC Incoming Papua</button>`;
+            }
+          } else {
+            actionBtn = `<span style="font-size:0.72rem; color:var(--slate-400);">View Only (PM)</span>`;
+          }
+
+          return `
+            <tr>
+              <td>${isSiap && currentUser.bisaInput ? `<input type="checkbox" class="ship-chk" value="${l.idLog}" ${selectedShipIds.has(l.idLog) ? 'checked' : ''} onchange="toggleShipCheck('${l.idLog}', this.checked)" />` : ""}</td>
+              <td><strong>${l.tagBundel}</strong></td>
+              <td>${l.bangunan} • <strong>${l.kodeItem}</strong><div style="font-size:0.72rem; color:var(--slate-500);">${l.namaItem}</div></td>
+              <td><strong>${l.qty}</strong> Unit<div style="font-size:0.71rem; color:var(--slate-500);">${l.unitList}</div></td>
+              <td>${stPill}</td>
+              <td>${shipInfo}</td>
+              <td>${papuaInfo}</td>
+              <td class="text-center"><button class="btn btn-light btn-sm" onclick="openPhotoTrail('${l.idLog}')">Jejak Foto</button></td>
+              <td class="text-center">${actionBtn}</td>
+            </tr>
+          `;
+        }).join("");
+    }
+
+    function toggleShipCheck(idLog, checked) {
+      if (checked) selectedShipIds.add(idLog);
+      else selectedShipIds.delete(idLog);
+    }
+
+    function toggleAllShipCheck(checked) {
+      document.querySelectorAll(".ship-chk").forEach(cb => {
+        cb.checked = checked;
+        if (checked) selectedShipIds.add(cb.value);
+        else selectedShipIds.delete(cb.value);
+      });
+    }
+
+    function openSingleShipping(idLog) {
+      selectedShipIds.clear();
+      selectedShipIds.add(idLog);
+      openShippingModal();
+    }
+
+    function openShippingModal() {
+      if (selectedShipIds.size === 0) {
+        alert("Centang minimal 1 bundel berstatus 'Siap Kirim' terlebih dahulu.");
+        return;
+      }
+      const tags = Array.from(selectedShipIds).map(id => {
+        const l = logs.find(x => x.idLog === id);
+        return l ? l.tagBundel : id;
+      });
+      document.getElementById("shipModalDesc").textContent = `Bundel yang dikirim (${tags.length}): ${tags.join(", ")}`;
+      document.getElementById("shipNoKontainer").value = "";
+      document.getElementById("shipTglBerangkat").value = new Date().toISOString().split("T")[0];
+      document.getElementById("shipEstimasi").value = "";
+      capturedPhotos.shipping = "";
+      const prev = document.getElementById("shipPhotoPreview");
+      prev.src = ""; prev.style.display = "none";
+      document.getElementById("shippingModal").classList.add("show");
+    }
+
+    async function submitShipping() {
+      const noCont = document.getElementById("shipNoKontainer").value.trim();
+      const tglBrkt = document.getElementById("shipTglBerangkat").value;
+      const est = document.getElementById("shipEstimasi").value;
+      if (!noCont) { alert("Nomor Kontainer / Surat Jalan wajib diisi."); return; }
+      if (!capturedPhotos.shipping) { alert("Wajib mengambil foto loading / segel kontainer."); return; }
+
+      const btn = document.getElementById("btnSubmitShip");
+      btn.disabled = true; btn.textContent = "Menyimpan...";
+
+      const idArr = Array.from(selectedShipIds);
+      idArr.forEach(id => {
+        const idx = logs.findIndex(l => l.idLog === id);
+        if (idx > -1) {
+          logs[idx].statusTracking = "Dalam Pengiriman";
+          logs[idx].noKontainer = noCont;
+          logs[idx].tglBerangkat = tglBrkt;
+          logs[idx].estimasiTiba = est;
+          logs[idx].fotoShipping = capturedPhotos.shipping;
+        }
+      });
+
+      if (apiUrl && apiUrl.startsWith("http")) {
+        try {
+          const res = await fetch(apiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({
+              action: "submitShipping",
+              idLogs: idArr,
+              noKontainer: noCont,
+              tglBerangkat: tglBrkt,
+              estimasiTiba: est,
+              fotoBase64: capturedPhotos.shipping
+            })
+          });
+          const data = await res.json();
+          if (data.status === "success" && data.fotoShipping) {
+            idArr.forEach(id => {
+              const idx = logs.findIndex(l => l.idLog === id);
+              if (idx > -1) logs[idx].fotoShipping = data.fotoShipping;
+            });
+          }
+        } catch (e) { console.warn(e); }
+      }
+
+      selectedShipIds.clear();
+      saveLocalAll();
+      btn.disabled = false; btn.textContent = "Simpan Data Pengiriman";
+      closeModal("shippingModal");
+      renderPapuaTracking();
+    }
+
+    function openPapuaIncomingModal(idLog) {
+      const l = logs.find(x => x.idLog === idLog);
+      if (!l) return;
+      document.getElementById("papuaLogId").value = idLog;
+      document.getElementById("papuaModalDesc").textContent = `Tag: ${l.tagBundel} | Kontainer: ${l.noKontainer} | ${l.qty} Unit (${l.kodeItem})`;
+      document.getElementById("papuaTglTerima").value = new Date().toISOString().split("T")[0];
+      document.getElementById("papuaKondisi").value = "Lengkap & Mulus";
+      document.getElementById("papuaCatatan").value = "";
+      capturedPhotos.papua = "";
+      const prev = document.getElementById("papuaPhotoPreview");
+      prev.src = ""; prev.style.display = "none";
+      document.getElementById("papuaModal").classList.add("show");
+    }
+
+    async function submitPapuaIncoming() {
+      const idLog = document.getElementById("papuaLogId").value;
+      const tgl = document.getElementById("papuaTglTerima").value;
+      const kondisi = document.getElementById("papuaKondisi").value;
+      const cat = document.getElementById("papuaCatatan").value.trim();
+      if (!capturedPhotos.papua) { alert("Wajib mengambil foto bukti QC Incoming di Site Papua."); return; }
+
+      const btn = document.getElementById("btnSubmitPapua");
+      btn.disabled = true; btn.textContent = "Menyimpan...";
+
+      const now = new Date();
+      const pad = n => String(n).padStart(2, "0");
+      const nowStr = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+
+      const idx = logs.findIndex(l => l.idLog === idLog);
+      if (idx > -1) {
+        logs[idx].statusTracking = "QC Incoming Papua";
+        logs[idx].tglTerimaPapua = tgl;
+        logs[idx].kondisiPapua = kondisi;
+        logs[idx].catatanPapua = cat;
+        logs[idx].fotoIncomingPapua = capturedPhotos.papua;
+        logs[idx].papuaBy = `${currentUser.nama} (${nowStr})`;
+      }
+
+      if (apiUrl && apiUrl.startsWith("http")) {
+        try {
+          const res = await fetch(apiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({
+              action: "submitPapuaIncoming",
+              idLog,
+              tglTerimaPapua: tgl,
+              kondisiPapua: kondisi,
+              catatanPapua: cat,
+              fotoBase64: capturedPhotos.papua,
+              userName: currentUser.nama
+            })
+          });
+          const data = await res.json();
+          if (data.status === "success" && data.fotoIncomingPapua && idx > -1) {
+            logs[idx].fotoIncomingPapua = data.fotoIncomingPapua;
+          }
+        } catch (e) { console.warn(e); }
+      }
+
+      saveLocalAll();
+      btn.disabled = false; btn.textContent = "Simpan QC Incoming Papua";
+      closeModal("papuaModal");
+      renderPapuaTracking();
+    }
+
+    // ==================== IN-APP LIVE CAMERA & AUTO-WATERMARK ====================
+    async function openLiveCamera(targetKey) {
+      activeCamTarget = targetKey;
+      const modal = document.getElementById("cameraModal");
+      const video = document.getElementById("liveVideoEl");
+      const errEl = document.getElementById("camErrorMsg");
+      errEl.style.display = "none";
+      video.style.display = "block";
+      modal.classList.add("show");
+
+      try {
+        activeStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 960 } },
+          audio: false
+        });
+        video.srcObject = activeStream;
+      } catch (err) {
+        video.style.display = "none";
+        errEl.style.display = "block";
+        errEl.textContent = "Kamera live tidak terdeteksi di perangkat ini (atau izin kamera ditolak). Silakan gunakan tombol 'File Cadangan' atau izinkan akses kamera pada browser.";
+      }
+    }
+
+    function closeLiveCamera() {
+      if (activeStream) {
+        activeStream.getTracks().forEach(t => t.stop());
+        activeStream = null;
+      }
+      document.getElementById("cameraModal").classList.remove("show");
+    }
+
+    function snapLivePhoto() {
+      const video = document.getElementById("liveVideoEl");
+      if (!video.srcObject) {
+        closeLiveCamera();
+        return;
+      }
+      const canvas = document.createElement("canvas");
+      const maxW = 1024;
+      const ratio = video.videoHeight / (video.videoWidth || 1);
+      canvas.width = Math.min(maxW, video.videoWidth || 1024);
+      canvas.height = Math.round(canvas.width * (ratio || 0.75));
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      applyWatermarkAndSave(canvas, activeCamTarget);
+      closeLiveCamera();
+    }
+
+    function triggerFallbackFile(targetKey) {
+      const map = { insp: "inspFallbackInput", rework: "rwFallbackInput", shipping: "shipFallbackInput", papua: "papuaFallbackInput" };
+      document.getElementById(map[targetKey]).click();
+    }
+
+    function handleFallbackFile(event, targetKey) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const maxW = 1024;
+          let w = img.width, h = img.height;
+          if (w > maxW) { h = Math.round((h * maxW) / w); w = maxW; }
+          canvas.width = w; canvas.height = h;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, w, h);
+          applyWatermarkAndSave(canvas, targetKey);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function buildWatermarkLines(targetKey) {
+      const now = new Date();
+      const pad = n => String(n).padStart(2, "0");
+      const ts = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
+      const userStr = currentUser ? currentUser.nama : "User";
+
+      if (targetKey === "insp") {
+        const bldg = document.getElementById("fInspBangunan").value.toUpperCase();
+        const kode = document.getElementById("fInspKode").value;
+        const tag = document.getElementById("nextBundleBadge").dataset.tag || "-";
+        const st = document.getElementById("fInspStatusQc").value === "OK" ? "LOLOS QA/QC (OK)" : "REWORK (NG)";
+        const uArr = Array.from(selectedUnits).sort();
+        const uTxt = uArr.length > 0 ? `${uArr[0]}..${uArr[uArr.length-1]} (${uArr.length} Unit)` : "0 Unit";
+        return [
+          `LNG TANGGUH — BANGUNAN ${bldg} | TAG: ${tag}`,
+          `ITEM: ${kode} | UNIT: ${uTxt} | STATUS: ${st}`,
+          `INSPEKTOR: ${userStr} | ${ts}`
+        ];
+      }
+      if (targetKey === "rework") {
+        const desc = document.getElementById("rwModalDesc").textContent;
+        return [
+          `LNG TANGGUH — AFTER REPAIR (SELESAI PERBAIKAN)`,
+          `${desc}`,
+          `OLEH: ${userStr} | ${ts}`
+        ];
+      }
+      if (targetKey === "shipping") {
+        const noCont = document.getElementById("shipNoKontainer").value || "KONTAINER";
+        return [
+          `LNG TANGGUH — SHIPPING JAKARTA -> SITE PAPUA`,
+          `NO. KONTAINER / SJ: ${noCont} (${selectedShipIds.size} Bundel)`,
+          `PETUGAS: ${userStr} | ${ts}`
+        ];
+      }
+      if (targetKey === "papua") {
+        const kond = document.getElementById("papuaKondisi").value.toUpperCase();
+        const desc = document.getElementById("papuaModalDesc").textContent;
+        return [
+          `LNG TANGGUH — QC INCOMING SITE TELUK BINTUNI PAPUA`,
+          `${desc} | KONDISI: ${kond}`,
+          `PENERIMA: ${userStr} | ${ts}`
+        ];
+      }
+      return [`LNG TANGGUH QA/QC | ${userStr} | ${ts}`];
+    }
+
+    function applyWatermarkAndSave(canvas, targetKey) {
+      const ctx = canvas.getContext("2d");
+      const lines = buildWatermarkLines(targetKey);
+      const fontSize = Math.max(13, Math.round(canvas.width * 0.017));
+      const lineH = fontSize + 6;
+      const boxH = lines.length * lineH + 16;
+
+      ctx.fillStyle = "rgba(15, 23, 42, 0.82)";
+      ctx.fillRect(0, canvas.height - boxH, canvas.width, boxH);
+
+      ctx.fillStyle = "#38bdf8";
+      ctx.fillRect(0, canvas.height - boxH, 6, boxH);
+
+      ctx.font = `bold ${fontSize}px sans-serif`;
+      lines.forEach((line, idx) => {
+        ctx.fillStyle = idx === 0 ? "#fde047" : "#ffffff";
+        ctx.fillText(line, 16, canvas.height - boxH + 20 + idx * lineH);
+      });
+
+      const finalDataUrl = canvas.toDataURL("image/jpeg", 0.78);
+      capturedPhotos[targetKey] = finalDataUrl;
+
+      const prevMap = { insp: "inspPhotoPreview", rework: "rwPhotoPreview", shipping: "shipPhotoPreview", papua: "papuaPhotoPreview" };
+      const prevEl = document.getElementById(prevMap[targetKey]);
+      if (prevEl) {
+        prevEl.src = finalDataUrl;
+        prevEl.style.display = "block";
+      }
+    }
+
+    function refreshLiveWatermarkPreview() {
+      // Optional visual cue when status changes
+    }
+
+    // ==================== BOQ & DOCUMENT CONTROL MODAL ====================
+    function openBoqModal(idItem) {
+      capturedPhotos.boqDoc = "";
+      const imgPrev = document.getElementById("bImgPreview");
+      imgPrev.style.display = "none";
+      document.getElementById("bFileImg").value = "";
+
+      if (idItem) {
+        const b = boqItems.find(x => x.idItem === idItem);
+        if (!b) return;
+        document.getElementById("boqModalTitle").textContent = `Edit Item BOQ & Dokumen: ${b.kodeItem}`;
+        document.getElementById("bIdItem").value = b.idItem;
+        document.getElementById("bBangunan").value = b.bangunan;
+        document.getElementById("bKode").value = b.kodeItem;
+        document.getElementById("bWarna").value = b.warna;
+        document.getElementById("bNama").value = b.namaItem;
+        document.getElementById("bSection").value = b.section;
+        document.getElementById("bSatuan").value = b.satuan;
+        document.getElementById("bTarget").value = b.target;
+        document.getElementById("bW1").value = b.planW1;
+        document.getElementById("bW2").value = b.planW2;
+        document.getElementById("bW3").value = b.planW3;
+        document.getElementById("bW4").value = b.planW4;
+        document.getElementById("bCatatan").value = b.catatanStandar || "";
+        if (b.gambarUrl) {
+          imgPrev.src = b.gambarUrl;
+          imgPrev.style.display = "block";
+        }
+      } else {
+        document.getElementById("boqModalTitle").textContent = "Tambah Item BOQ & Referensi Gambar Baru";
+        document.getElementById("bIdItem").value = "BOQ-" + Date.now();
+        document.getElementById("bBangunan").value = activeBuilding === "Workshop" ? "Workshop" : "Office";
+        document.getElementById("bKode").value = "";
+        document.getElementById("bNama").value = "";
+        document.getElementById("bSection").value = "Struktur Utama";
+        document.getElementById("bSatuan").value = "Batang";
+        document.getElementById("bTarget").value = 20;
+        document.getElementById("bW1").value = 5;
+        document.getElementById("bW2").value = 10;
+        document.getElementById("bW3").value = 15;
+        document.getElementById("bW4").value = 20;
+        document.getElementById("bCatatan").value = "";
+      }
+      document.getElementById("boqModal").classList.add("show");
+    }
+
+    function handleBoqDocImage(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const maxW = 900;
+          let w = img.width, h = img.height;
+          if (w > maxW) { h = Math.round((h * maxW) / w); w = maxW; }
+          canvas.width = w; canvas.height = h;
+          canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+          capturedPhotos.boqDoc = canvas.toDataURL("image/jpeg", 0.8);
+          const prev = document.getElementById("bImgPreview");
+          prev.src = capturedPhotos.boqDoc;
+          prev.style.display = "block";
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function saveBoqDoc() {
+      const idItem = document.getElementById("bIdItem").value;
+      const bangunan = document.getElementById("bBangunan").value;
+      const kodeItem = document.getElementById("bKode").value.trim();
+      const namaItem = document.getElementById("bNama").value.trim();
+      if (!kodeItem || !namaItem) { alert("Kode Item dan Nama Item wajib diisi."); return; }
+
+      const btn = document.getElementById("btnSaveBoqDoc");
+      btn.disabled = true; btn.textContent = "Menyimpan...";
+
+      const existing = boqItems.find(x => x.idItem === idItem);
+      const updatedObj = {
+        idItem,
+        bangunan,
+        kodeItem,
+        namaItem,
+        section: document.getElementById("bSection").value.trim(),
+        warna: document.getElementById("bWarna").value,
+        satuan: document.getElementById("bSatuan").value.trim(),
+        target: Number(document.getElementById("bTarget").value) || 0,
+        planW1: Number(document.getElementById("bW1").value) || 0,
+        planW2: Number(document.getElementById("bW2").value) || 0,
+        planW3: Number(document.getElementById("bW3").value) || 0,
+        planW4: Number(document.getElementById("bW4").value) || 0,
+        gambarUrl: capturedPhotos.boqDoc || (existing ? existing.gambarUrl : ""),
+        catatanStandar: document.getElementById("bCatatan").value.trim()
+      };
+
+      if (apiUrl && apiUrl.startsWith("http")) {
+        try {
+          const res = await fetch(apiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({
+              action: "upsertBoqDoc",
+              ...updatedObj,
+              kodeWarna: updatedObj.warna,
+              fotoBase64: capturedPhotos.boqDoc
+            })
+          });
+          const data = await res.json();
+          if (data.status === "success" && data.gambarUrl) {
+            updatedObj.gambarUrl = data.gambarUrl;
+          }
+        } catch (e) { console.warn(e); }
+      }
+
+      const idx = boqItems.findIndex(x => x.idItem === idItem);
+      if (idx > -1) boqItems[idx] = updatedObj;
+      else boqItems.push(updatedObj);
+
+      saveLocalAll();
+      btn.disabled = false; btn.textContent = "Simpan Item BOQ & Dokumen";
+      closeModal("boqModal");
+      renderDocControl();
+    }
+
+    // ==================== PHOTO TRAIL VIEWER ====================
+    function openPhotoTrail(idLog) {
+      const l = logs.find(x => x.idLog === idLog);
+      if (!l) return;
+      document.getElementById("ptModalTitle").textContent = `Jejak Dokumentasi Foto — ${l.tagBundel}`;
+      document.getElementById("ptModalSub").textContent = `${l.bangunan} • ${l.kodeItem} (${l.namaItem}) | Unit: ${l.unitList}`;
+
+      const slots = [
+        { title: "1. Foto Temuan NG Awal (Workshop)", url: l.fotoTemuanNg, note: l.catatanInspeksi },
+        { title: "2. Foto After Repair (Perbaikan)", url: l.fotoAfterRepair, note: l.catatanRepair },
+        { title: "3. Foto Lolos QA/QC Jakarta", url: l.fotoQcOk, note: l.catatanInspeksi },
+        { title: "4. Foto Loading / Segel Kontainer", url: l.fotoShipping, note: l.noKontainer ? `Kontainer: ${l.noKontainer} (${l.tglBerangkat})` : "" },
+        { title: "5. Foto QC Incoming Site Papua", url: l.fotoIncomingPapua, note: l.kondisiPapua ? `${l.kondisiPapua} — ${l.catatanPapua}` : "" }
+      ].filter(s => s.url);
+
+      document.getElementById("ptPhotosGrid").innerHTML = slots.length === 0
+        ? `<div style="grid-column:1/-1; text-align:center; padding:20px; color:var(--slate-500);">Belum ada foto yang diunggah pada baris ini.</div>`
+        : slots.map(s => `
+          <div style="border:1px solid var(--border); border-radius:8px; padding:10px; background:var(--slate-50);">
+            <div style="font-size:0.76rem; font-weight:800; color:var(--navy); margin-bottom:6px;">${s.title}</div>
+            <img src="${s.url}" alt="${s.title}" style="width:100%; max-height:220px; object-fit:contain; border-radius:6px; background:#000;" />
+            <div style="font-size:0.73rem; color:var(--slate-600); margin-top:6px;">${s.note || "-"}</div>
+            ${s.url.startsWith("http") ? `<a href="${s.url}" target="_blank" style="font-size:0.73rem; color:var(--blue); display:inline-block; margin-top:4px;">Buka Ukuran Penuh &rarr;</a>` : ""}
+          </div>
+        `).join("");
+
+      document.getElementById("photoTrailModal").classList.add("show");
+    }
+
+    // ==================== MENU 5: CETAK PDF BERBASIS BOQ ====================
+    function buildBoqReportHtml() {
+      const sBoq = getScopedBoq();
+      const sLogs = getScopedLogs();
+      const areaTitle = activeBuilding === "Gabungan" ? "BANGUNAN OFFICE & WORKSHOP (GABUNGAN)" : `BANGUNAN ${activeBuilding.toUpperCase()}`;
+      const today = new Date().toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" });
+
+      const boqRows = sBoq.map((b, idx) => {
+        const iLogs = sLogs.filter(l => l.bangunan === b.bangunan && l.kodeItem === b.kodeItem);
+        const okQty = iLogs.filter(l => l.statusQc === "OK").reduce((s, l) => s + Number(l.qty || 0), 0);
+        const appQty = iLogs.filter(l => l.statusApproval === "Approved").reduce((s, l) => s + Number(l.qty || 0), 0);
+        const shipQty = iLogs.filter(l => l.statusTracking === "Dalam Pengiriman" || l.statusTracking === "QC Incoming Papua").reduce((s, l) => s + Number(l.qty || 0), 0);
+        const papuaQty = iLogs.filter(l => l.statusTracking === "QC Incoming Papua").reduce((s, l) => s + Number(l.qty || 0), 0);
+        const sisa = Math.max(0, Number(b.target) - okQty);
+        const pct = b.target > 0 ? Math.round((appQty / b.target) * 100) : 0;
+
+        return `
+          <tr>
+            <td style="text-align:center;">${idx + 1}</td>
+            <td><strong>${b.kodeItem}</strong><br><small>${b.bangunan}</small></td>
+            <td>${b.namaItem}<br><small style="color:#475569;">${b.section}</small></td>
+            <td style="text-align:center;">${b.warna}</td>
+            <td style="text-align:right;"><strong>${b.target}</strong> ${b.satuan}</td>
+            <td style="text-align:right;">${okQty}</td>
+            <td style="text-align:right;"><strong>${appQty}</strong></td>
+            <td style="text-align:right;">${shipQty} / ${papuaQty}</td>
+            <td style="text-align:right;">${sisa}</td>
+            <td style="text-align:center;"><strong>${pct}%</strong></td>
+          </tr>
+        `;
+      }).join("");
+
+      const bundleRows = sLogs.map((l, idx) => `
+        <tr>
+          <td style="text-align:center;">${idx + 1}</td>
+          <td><strong>${l.tagBundel}</strong></td>
+          <td>${l.kodeItem} (${l.bangunan})</td>
+          <td>${l.unitList} (${l.qty})</td>
+          <td>${l.statusApproval}</td>
+          <td>${l.statusTracking}${l.noKontainer ? ` (${l.noKontainer})` : ""}</td>
+          <td>${l.kondisiPapua || "-"}</td>
+        </tr>
+      `).join("");
+
+      return `
+        <div class="p-head">
+          <h2>BERITA ACARA PROGRES QA/QC FABRIKASI &amp; TRACKING MATERIAL (BERBASIS BOQ)</h2>
+          <p><strong>Proyek:</strong> Temporary Utility — LNG Tangguh | <strong>Area:</strong> ${areaTitle} | <strong>Tanggal Cetak:</strong> ${today}</p>
+        </div>
+        <h4 style="margin-bottom:6px;">1. Rekapitulasi Capaian Berdasarkan Daftar Item BOQ</h4>
+        <table class="p-table">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Kode Item</th>
+              <th>Deskripsi Item BOQ</th>
+              <th>Warna</th>
+              <th>Target BOQ</th>
+              <th>Lolos QC</th>
+              <th>Approved JKT</th>
+              <th>Kirim / Tiba Papua</th>
+              <th>Kurang / Sisa</th>
+              <th>% Approved</th>
+            </tr>
+          </thead>
+          <tbody>${boqRows}</tbody>
+        </table>
+        <h4 style="margin-bottom:6px;">2. Rincian Tag Bundel, Status Approval &amp; Tracking Pengiriman</h4>
+        <table class="p-table">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Tag Bundel</th>
+              <th>Kode Item</th>
+              <th>Nomor Unit &amp; Qty</th>
+              <th>Approval Jakarta</th>
+              <th>Status Tracking</th>
+              <th>QC Incoming Papua</th>
+            </tr>
+          </thead>
+          <tbody>${bundleRows}</tbody>
+        </table>
+        <div class="p-sign">
+          <div>
+            <div>Diperiksa &amp; Disusun Oleh (Lapangan):</div>
+            <div class="p-sign-box"></div>
+            <div><strong>______________________________</strong></div>
+            <div>Site Engineer / QA-QC Lead</div>
+          </div>
+          <div>
+            <div>Disetujui Oleh (Kantor Pusat):</div>
+            <div class="p-sign-box"></div>
+            <div><strong>______________________________</strong></div>
+            <div>Project Manager</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderBoqPdfPreview() {
+      document.getElementById("boqReportPreviewContainer").innerHTML = buildBoqReportHtml();
+    }
+
+    function printBoqPdf() {
+      document.getElementById("printOnlyArea").innerHTML = buildBoqReportHtml();
+      window.print();
+    }
+
+    // ==================== CLOUD SYNC & STORAGE ====================
+    function saveLocalAll() {
+      localStorage.setItem("tangguh_v2_boq", JSON.stringify(boqItems));
+      localStorage.setItem("tangguh_v2_logs", JSON.stringify(logs));
+    }
+
+    function openDbModal() {
+      document.getElementById("inpApiUrl").value = apiUrl;
+      document.getElementById("dbModal").classList.add("show");
+    }
+
+    async function saveApiUrl() {
+      apiUrl = document.getElementById("inpApiUrl").value.trim();
+      localStorage.setItem("tangguh_v2_api_url", apiUrl);
+      updateConnIndicators();
+      closeModal("dbModal");
+      if (apiUrl) {
+        await syncFromCloud(false);
+      }
+    }
+
+    async function syncFromCloud(silent) {
+      if (!apiUrl || !apiUrl.startsWith("http")) return;
+      const pillTxt = document.getElementById("connPillText");
+      if (pillTxt) pillTxt.textContent = "Menyinkronkan...";
+      try {
+        const res = await fetch(apiUrl + "?t=" + Date.now());
+        const data = await res.json();
+        if (data.status === "success") {
+          if (data.users && data.users.length > 0) masterUsers = data.users;
+          if (data.boqItems && data.boqItems.length > 0) boqItems = data.boqItems;
+          if (data.logs) logs = data.logs.slice().reverse();
+          saveLocalAll();
+          updateConnIndicators();
+          if (currentUser) refreshActiveView();
+          if (!silent) alert("Sinkronisasi dengan Google Sheets & Google Drive berhasil!");
+        }
+      } catch (err) {
+        if (pillTxt) pillTxt.textContent = "Gagal Sync (Cek URL)";
+        if (!silent) alert("Gagal terhubung ke Google Sheets. Pastikan URL Web App berakhiran /exec dan akses disetel 'Anyone'.");
+      }
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove("show");
+    }
+  </script>
+</body>
+</html>
