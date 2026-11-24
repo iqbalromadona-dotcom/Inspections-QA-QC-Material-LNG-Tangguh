@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QA/QC & Monitoring Fabrikasi — LNG Tangguh</title>
+  <style>
+    :root {
+      --navy: #0f172a;
+      --slate-dark: #1e293b;
+      --slate-med: #334155;
+      --slate-muted: #64748b;
+      --border: #cbd5e1;
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --blue: #2563eb;
+      --blue-soft: #dbeafe;
+      --green: #16a34a;
+      --green-soft: #dcfce7;
+      --amber: #d97706;
+      --amber-soft: #fef3c7;
+      --red: #dc2626;
+      --red-soft: #fee2e2;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+    body { background: var(--bg); color: var(--navy); line-height: 1.45; }
+
+    /* Header */
+    .topbar {
+      background: linear-gradient(135deg, var(--navy) 0%, var(--slate-dark) 100%);
+      color: #fff;
+      padding: 14px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.2);
+    }
+    .brand h1 { font-size: 1.05rem; font-weight: 700; letter-spacing: 0.2px; }
+    .brand p { font-size: 0.78rem; color: #94a3b8; margin-top: 2px; }
+
+    .top-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .badge-conn {
+      font-size: 0.75rem; font-weight: 600; padding: 5px 10px; border-radius: 999px;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .badge-online { background: rgba(22, 163, 74, 0.2); color: #86efac; border: 1px solid rgba(134, 239, 172, 0.4); }
+    .badge-demo { background: rgba(217, 119, 6, 0.22); color: #fcd34d; border: 1px solid rgba(252, 211, 77, 0.4); }
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .badge-online .dot { background: #22c55e; }
+    .badge-demo .dot { background: #f59e0b; }
+
+    .btn {
+      border: none; border-radius: 7px; padding: 7px 12px; font-size: 0.8rem; font-weight: 600;
+      cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: 0.15s;
+    }
+    .btn:hover { opacity: 0.92; transform: translateY(-1px); }
+    .btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+    .btn-primary { background: var(--blue); color: #fff; }
+    .btn-success { background: var(--green); color: #fff; }
+    .btn-warning { background: var(--amber); color: #fff; }
+    .btn-danger { background: var(--red); color: #fff; }
+    .btn-outline { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.25); }
+    .btn-light { background: #f8fafc; color: var(--slate-dark); border: 1px solid var(--border); }
+    .btn-sm { padding: 4px 9px; font-size: 0.74rem; }
+
+    /* Nav Tabs */
+    .nav-tabs {
+      background: #fff; border-bottom: 1px solid var(--border);
+      padding: 0 20px; display: flex; gap: 8px; overflow-x: auto;
+    }
+    .tab-btn {
+      padding: 12px 16px; font-size: 0.85rem; font-weight: 600; color: var(--slate-muted);
+      background: none; border: none; border-bottom: 3px solid transparent; cursor: pointer; white-space: nowrap;
+    }
+    .tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); }
+
+    /* Alert Banner */
+    .setup-banner {
+      background: #fffbeb; border-bottom: 1px solid #fde68a; color: #92400e;
+      padding: 9px 20px; font-size: 0.8rem; display: flex; flex-wrap: wrap;
+      align-items: center; justify-content: space-between; gap: 8px;
+    }
+    .offline-banner {
+      background: #fef2f2; border-bottom: 1px solid #fecaca; color: #991b1b;
+      padding: 9px 20px; font-size: 0.8rem; display: none;
+      align-items: center; justify-content: space-between; gap: 8px;
+    }
+
+    /* Main Container */
+    .container { max-width: 1440px; margin: 18px auto; padding: 0 16px; }
+    .grid-main { display: grid; grid-template-columns: 380px 1fr; gap: 18px; align-items: start; }
+    @media (max-width: 1024px) { .grid-main { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+      padding: 16px; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05); margin-bottom: 16px;
+    }
+    .card-header {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid #e2e8f0;
+    }
+    .card-title { font-size: 0.95rem; font-weight: 700; color: var(--slate-dark); }
+    .card-sub { font-size: 0.76rem; color: var(--slate-muted); }
+
+    /* Form Elements */
+    .form-group { margin-bottom: 12px; }
+    .form-label { display: block; font-size: 0.78rem; font-weight: 600; color: var(--slate-med); margin-bottom: 4px; }
+    .form-control {
+      width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 7px;
+      font-size: 0.85rem; color: var(--navy); background: #fff;
+    }
+    .form-control:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,0.12); }
+    .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    .target-hint {
+      margin-top: 6px; padding: 8px 10px; border-radius: 7px; background: #f8fafc;
+      border: 1px solid #e2e8f0; font-size: 0.78rem; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px;
+    }
+    .hint-ok { color: var(--green); font-weight: 700; }
+    .hint-sisa { color: var(--amber); font-weight: 700; }
+
+    .photo-box {
+      border: 1.5px dashed #94a3b8; border-radius: 8px; padding: 10px; text-align: center;
+      background: #f8fafc; cursor: pointer;
+    }
+    .photo-preview {
+      max-width: 100%; max-height: 150px; border-radius: 6px; margin-top: 8px; display: none;
+      object-fit: cover; border: 1px solid var(--border);
+    }
+
+    /* KPI Grid */
+    .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+    @media (max-width: 768px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+    .kpi-card {
+      background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 14px;
+      border-top: 4px solid var(--blue);
+    }
+    .kpi-card.green { border-top-color: var(--green); }
+    .kpi-card.amber { border-top-color: var(--amber); }
+    .kpi-card.slate { border-top-color: var(--slate-dark); }
+    .kpi-label { font-size: 0.74rem; font-weight: 700; color: var(--slate-muted); text-transform: uppercase; }
+    .kpi-value { font-size: 1.45rem; font-weight: 800; color: var(--navy); margin: 4px 0 2px; }
+    .kpi-foot { font-size: 0.74rem; color: var(--slate-muted); }
+
+    /* Tables */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.81rem; }
+    th {
+      background: #f8fafc; color: var(--slate-med); font-weight: 700; text-align: left;
+      padding: 9px 10px; border-bottom: 2px solid var(--border); white-space: nowrap;
+    }
+    td { padding: 9px 10px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
+    tr:hover td { background: #f8fafc; }
+    .text-right { text-align: right; }
+    .text-center { text-align: center; }
+
+    /* Progress Bar */
+    .prog-bg { width: 100%; height: 8px; background: #e2e8f0; border-radius: 999px; overflow: hidden; min-width: 70px; }
+    .prog-fill { height: 100%; background: var(--green); border-radius: 999px; transition: width 0.3s; }
+
+    /* Pills */
+    .pill {
+      display: inline-block; padding: 3px 8px; border-radius: 999px; font-size: 0.72rem; font-weight: 700; white-space: nowrap;
+    }
+    .pill-green { background: var(--green-soft); color: #166534; }
+    .pill-amber { background: var(--amber-soft); color: #92400e; }
+    .pill-red { background: var(--red-soft); color: #991b1b; }
+    .pill-blue { background: var(--blue-soft); color: #1e40af; }
+
+    .color-tag {
+      display: inline-flex; align-items: center; gap: 5px; font-size: 0.74rem; font-weight: 600;
+    }
+    .swatch { width: 10px; height: 10px; border-radius: 3px; border: 1px solid rgba(0,0,0,0.2); }
+
+    /* S-Curve SVG */
+    .scurve-box { width: 100%; overflow-x: auto; }
+    .scurve-legend { display: flex; gap: 16px; font-size: 0.78rem; margin-bottom: 8px; flex-wrap: wrap; }
+    .leg-item { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
+
+    /* Modals */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(15, 23, 42, 0.55);
+      display: none; align-items: center; justify-content: center; z-index: 100; padding: 16px;
+    }
+    .modal-backdrop.show { display: flex; }
+    .modal {
+      background: #fff; border-radius: 12px; max-width: 560px; width: 100%;
+      max-height: 90vh; overflow-y: auto; padding: 20px; box-shadow: 0 20px 35px rgba(0,0,0,0.25);
+    }
+    .modal-title { font-size: 1.02rem; font-weight: 700; margin-bottom: 6px; }
+    .modal-desc { font-size: 0.8rem; color: var(--slate-muted); margin-bottom: 14px; }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+
+    /* Print Section (Hidden on Screen, Visible on Print) */
+    #printReportArea { display: none; }
+
+    @media print {
+      body { background: #fff; }
+      .topbar, .nav-tabs, .setup-banner, .offline-banner, #mainAppContent, .modal-backdrop { display: none !important; }
+      #printReportArea { display: block !important; padding: 10px; }
+      .print-header { border-bottom: 2px solid #0f172a; padding-bottom: 10px; margin-bottom: 14px; }
+      .print-header h2 { font-size: 16pt; color: #0f172a; }
+      .print-header p { font-size: 9.5pt; color: #334155; }
+      .print-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 8.5pt; }
+      .print-table th, .print-table td { border: 1px solid #94a3b8; padding: 6px 8px; }
+      .print-table th { background: #1e293b !important; color: #fff !important; -webkit-print-color-adjust: exact; }
+      .sign-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 30px; text-align: center; font-size: 9.5pt; }
+      .sign-space { height: 65px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP HEADER -->
+  <header class="topbar">
+    <div class="brand">
+      <h1>QA/QC & Monitoring Fabrikasi — LNG Tangguh</h1>
+      <p>Proyek Temporary Utility (Office & Workshop) • Workshop Jakarta &rarr; Site Teluk Bintuni</p>
+    </div>
+    <div class="top-actions">
+      <span id="connBadge" class="badge-conn badge-demo"><span class="dot"></span> <span id="connText">Mode Lokal (Demo)</span></span>
+      <button class="btn btn-outline" onclick="openDbModal()">Hubungkan Database</button>
+      <button class="btn btn-outline" onclick="syncFromCloud()">Refresh</button>
+      <button class="btn btn-outline" onclick="openTargetModal()">Atur Target BOQ</button>
+      <button class="btn btn-success" onclick="printPdfReport()">Cetak / PDF Laporan</button>
+    </div>
+  </header>
+
+  <!-- BANNERS -->
+  <div id="setupBanner" class="setup-banner">
+    <span><strong>Info:</strong> Dashboard saat ini berjalan di <strong>Mode Lokal</strong> (data tersimpan di browser ini). Klik <strong>Hubungkan Database</strong> dan tempel URL Google Apps Script agar data HP &amp; Laptop Kantor tersinkron otomatis.</span>
+    <button class="btn btn-warning btn-sm" onclick="openDbModal()">Tempel URL Sekarang</button>
+  </div>
+
+  <div id="offlineBanner" class="offline-banner">
+    <span><strong>Antrean Offline:</strong> Ada <span id="offlineCount">0</span> data inspeksi menunggu koneksi internet untuk dikirim ke Google Sheets.</span>
+    <button class="btn btn-danger btn-sm" onclick="flushOfflineQueue()">Kirim Antrean Sekarang</button>
+  </div>
+
+  <!-- NAVIGATION TABS -->
+  <nav class="nav-tabs">
+    <button class="tab-btn active" id="tabBtnJakarta" onclick="switchTab('jakarta')">1. Workshop Jakarta (QA/QC, Kitting &amp; Approval)</button>
+    <button class="tab-btn" id="tabBtnPapua" onclick="switchTab('papua')">2. Site Papua (Tracking Pengiriman &amp; Baut Lapangan)</button>
+  </nav>
+
+  <!-- MAIN APP CONTENT -->
+  <div id="mainAppContent" class="container">
+
+    <!-- TAB 1: WORKSHOP JAKARTA -->
+    <div id="viewJakarta">
+      <div class="grid-main">
+
+        <!-- LEFT: FORM INPUT LAPANGAN -->
+        <div>
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Input Inspeksi QA/QC (Workshop)</div>
+                <div class="card-sub">Catat hasil cek potong, las, mal, label &amp; foto bukti</div>
+              </div>
+            </div>
+
+            <form id="qcForm" onsubmit="handleFormSubmit(event)">
+              <div class="form-group">
+                <label class="form-label">Section / Modul Pekerjaan</label>
+                <select id="inpSection" class="form-control" onchange="updateSectionHint()" required></select>
+                <div id="sectionHint" class="target-hint">
+                  <span>Target: <strong>-</strong></span>
+                  <span class="hint-ok">Lolos: -</span>
+                  <span class="hint-sisa">Kurang: -</span>
+                </div>
+              </div>
+
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label class="form-label">Kode Label / Tag Fisik</label>
+                  <input type="text" id="inpKode" class="form-control" placeholder="Contoh: UMP-A5" required />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Periode Minggu</label>
+                  <select id="inpMinggu" class="form-control">
+                    <option value="W1">Minggu 1 (W1)</option>
+                    <option value="W2">Minggu 2 (W2)</option>
+                    <option value="W3">Minggu 3 (W3)</option>
+                    <option value="W4">Minggu 4 (W4)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label class="form-label">Qty Lolos QA/QC (OK)</label>
+                  <input type="number" id="inpQtyOk" class="form-control" min="0" value="1" required />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Qty Rework (Perbaikan)</label>
+                  <input type="number" id="inpQtyRework" class="form-control" min="0" value="0" required />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Status Pelabelan &amp; Kode Warna</label>
+                <select id="inpStatusLabel" class="form-control">
+                  <option value="Sudah Dilabel">Sudah Dilabel &amp; Dicat Warna Modul</option>
+                  <option value="Belum Dilabel">Belum Dilabel (Menunggu Rework/Cat)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Foto Bukti Fisik &amp; Label (Kamera / Galeri)</label>
+                <div class="photo-box" onclick="document.getElementById('inpFoto').click()">
+                  <div style="font-size:0.8rem; font-weight:600; color:var(--blue);">+ Ambil Foto / Pilih Gambar</div>
+                  <div style="font-size:0.72rem; color:var(--slate-muted); margin-top:2px;">Otomatis dikompres agar cepat terkirim ke Google Drive</div>
+                  <img id="fotoPreview" class="photo-preview" alt="Preview Foto" />
+                </div>
+                <input type="file" id="inpFoto" accept="image/*" capture="environment" style="display:none" onchange="handlePhotoSelect(event)" />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Catatan Teknis / Hasil Cek Mal &amp; Las</label>
+                <textarea id="inpCatatan" class="form-control" rows="2" placeholder="Contoh: Jarak baut angkur sesuai mal base plate, mur/ring terikat 1 paket."></textarea>
+              </div>
+
+              <button type="submit" id="btnSubmitQc" class="btn btn-primary" style="width:100%; justify-content:center; padding:10px;">
+                Simpan &amp; Sinkron ke Kantor
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- RIGHT: DASHBOARD MONITORING KANTOR -->
+        <div>
+          <!-- KPI CARDS -->
+          <div class="kpi-grid">
+            <div class="kpi-card slate">
+              <div class="kpi-label">Total Target (BOQ)</div>
+              <div class="kpi-value" id="kpiTotalTarget">0</div>
+              <div class="kpi-foot">Seluruh modul Office &amp; Workshop</div>
+            </div>
+            <div class="kpi-card green">
+              <div class="kpi-label">Lolos QA/QC (Aktual)</div>
+              <div class="kpi-value" id="kpiTotalOk">0</div>
+              <div class="kpi-foot" id="kpiPctOk">0.0% dari target fabrikasi</div>
+            </div>
+            <div class="kpi-card amber">
+              <div class="kpi-label">Sisa / Kurang Produksi</div>
+              <div class="kpi-value" id="kpiTotalSisa">0</div>
+              <div class="kpi-foot" id="kpiReworkInfo">0 item status rework</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Approved Atasan</div>
+              <div class="kpi-value" id="kpiApprovedCount">0</div>
+              <div class="kpi-foot" id="kpiPendingApp">0 menunggu verifikasi PM</div>
+            </div>
+          </div>
+
+          <!-- KURVA S (S-CURVE) -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Kurva S Progres Fabrikasi (1 Bulan / 4 Minggu)</div>
+                <div class="card-sub">Perbandingan Kumulatif Rencana (Plan) vs Aktual Lolos QA/QC</div>
+              </div>
+              <div style="display:flex; gap:6px;">
+                <button class="btn btn-light btn-sm" id="btnModePct" onclick="setCurveMode('pct')" style="border-color:var(--blue); color:var(--blue);">% Kumulatif</button>
+                <button class="btn btn-light btn-sm" id="btnModeQty" onclick="setCurveMode('qty')">Qty Kumulatif</button>
+              </div>
+            </div>
+
+            <div class="scurve-legend">
+              <span class="leg-item"><span class="swatch" style="background:#64748b;"></span> Rencana (Plan)</span>
+              <span class="leg-item"><span class="swatch" style="background:#16a34a;"></span> Aktual Lolos QA/QC</span>
+            </div>
+
+            <div class="scurve-box" id="scurveContainer"></div>
+
+            <div class="table-wrap" style="margin-top:10px;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Parameter Kumulatif</th>
+                    <th class="text-center">Minggu 1 (W1)</th>
+                    <th class="text-center">Minggu 2 (W2)</th>
+                    <th class="text-center">Minggu 3 (W3)</th>
+                    <th class="text-center">Minggu 4 (W4)</th>
+                  </tr>
+                </thead>
+                <tbody id="scurveTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- TABEL REKAP TARGET VS AKTUAL VS KURANG -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Rekapitulasi Target BOQ, Aktual &amp; Kekurangan per Section</div>
+                <div class="card-sub">Pantau jumlah kurang produksi dan kesiapan label fisik tiap modul</div>
+              </div>
+              <button class="btn btn-light btn-sm" onclick="openTargetModal()">Edit Target BOQ</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Section / Modul</th>
+                    <th>Kode Warna</th>
+                    <th class="text-right">Target BOQ</th>
+                    <th class="text-right">Lolos QA/QC</th>
+                    <th class="text-right">Rework</th>
+                    <th class="text-right">Kurang / Sisa</th>
+                    <th class="text-right">Sudah Dilabel</th>
+                    <th>Progres</th>
+                  </tr>
+                </thead>
+                <tbody id="rekapTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- LOG INSPEKSI & APPROVAL ATASAN -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Log Inspeksi Harian &amp; Verifikasi Approval Atasan</div>
+                <div class="card-sub">Klik tombol Approve untuk menandai pemeriksaan sudah divalidasi pimpinan/PM</div>
+              </div>
+              <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                <select id="filterStatus" class="form-control" style="width:auto; padding:5px 8px; font-size:0.78rem;" onchange="renderAll()">
+                  <option value="ALL">Semua Status</option>
+                  <option value="Menunggu Approval">Menunggu Approval</option>
+                  <option value="Approved">Sudah Approved</option>
+                  <option value="Rework">Rework</option>
+                </select>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Waktu / Minggu</th>
+                    <th>Kode Label &amp; Modul</th>
+                    <th class="text-center">Qty OK / RW</th>
+                    <th class="text-center">Foto Bukti</th>
+                    <th>Catatan</th>
+                    <th>Status &amp; Approval Atasan</th>
+                    <th class="text-center">Aksi Atasan</th>
+                  </tr>
+                </thead>
+                <tbody id="logTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: SITE PAPUA (FASE 2) -->
+    <div id="viewPapua" style="display:none;">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Fase 2 — Tracking Pengiriman Kontainer &amp; Pemasangan Baut di Site Papua</div>
+            <div class="card-sub">Setiap paket yang lolos QA/QC di Jakarta otomatis muncul di sini untuk dipantau hingga terpasang di Teluk Bintuni</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Kode Label</th>
+                <th>Section / Modul</th>
+                <th class="text-center">Qty Paket</th>
+                <th>Status Approval Jakarta</th>
+                <th>Status Lapangan Site Papua</th>
+                <th>Update Progres Site</th>
+              </tr>
+            </thead>
+            <tbody id="papuaTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MODAL 1: HUBUNGKAN DATABASE GOOGLE APPS SCRIPT -->
+  <div id="dbModal" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-title">Hubungkan ke Google Sheets &amp; Google Drive</div>
+      <div class="modal-desc">Tempel URL Web App dari Google Apps Script Anda agar semua data dan foto tersimpan di cloud dan bisa dipantau dari kantor secara real-time.</div>
+      <div class="form-group">
+        <label class="form-label">URL Web App Google Apps Script (berakhiran /exec)</label>
+        <input type="url" id="inpApiUrl" class="form-control" placeholder="https://script.google.com/macros/s/AKfycb.../exec" />
+      </div>
+      <div style="font-size:0.76rem; color:var(--slate-muted); background:#f8fafc; padding:10px; border-radius:7px; border:1px solid #e2e8f0;">
+        <strong>Tips:</strong> Setelah URL ini berhasil terhubung, Anda juga bisa menempelkannya di baris paling atas kode <code>index.html</code> pada GitHub (<code>DEFAULT_API_URL</code>) supaya atasan di kantor langsung terhubung otomatis tanpa perlu mengisi URL lagi.
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-light" onclick="closeModal('dbModal')">Batal</button>
+        <button class="btn btn-primary" onclick="saveApiUrl()">Simpan &amp; Tes Koneksi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: ATUR TARGET BOQ & RENCANA MINGGUAN -->
+  <div id="targetModal" class="modal-backdrop">
+    <div class="modal" style="max-width:680px;">
+      <div class="modal-title">Atur Target BOQ &amp; Rencana Kurva S (4 Minggu)</div>
+      <div class="modal-desc">Sesuaikan jumlah total target (BOQ) dan target kumulatif per minggu sesuai gambar kerja AFC.</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Section / Modul</th>
+              <th style="width:85px;">Target Total</th>
+              <th style="width:70px;">Plan W1</th>
+              <th style="width:70px;">Plan W2</th>
+              <th style="width:70px;">Plan W3</th>
+              <th style="width:70px;">Plan W4</th>
+            </tr>
+          </thead>
+          <tbody id="targetEditBody"></tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-light" onclick="closeModal('targetModal')">Batal</button>
+        <button class="btn btn-primary" id="btnSaveTargets" onclick="saveTargets()">Simpan Target BOQ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 3: APPROVAL ATASAN -->
+  <div id="approveModal" class="modal-backdrop">
+    <div class="modal" style="max-width:440px;">
+      <div class="modal-title">Validasi &amp; Approval Atasan</div>
+      <div class="modal-desc" id="approveModalDesc">Konfirmasi pemeriksaan item inspeksi QA/QC.</div>
+      <input type="hidden" id="approveLogId" />
+      <div class="form-group">
+        <label class="form-label">Nama &amp; Jabatan Pemeriksa / Approver</label>
+        <input type="text" id="inpApproverName" class="form-control" placeholder="Contoh: Bpk. Hendra (Project Manager)" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Keputusan Verifikasi</label>
+        <select id="inpApproveDecision" class="form-control">
+          <option value="Approved">Approved (Lolos &amp; Siap Kirim)</option>
+          <option value="Rework">Minta Rework / Perbaikan Ulang</option>
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-light" onclick="closeModal('approveModal')">Batal</button>
+        <button class="btn btn-success" id="btnConfirmApprove" onclick="submitApproval()">Simpan Approval</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 4: PREVIEW FOTO BESAR -->
+  <div id="photoModal" class="modal-backdrop" onclick="closeModal('photoModal')">
+    <div class="modal" style="max-width:600px; text-align:center;" onclick="event.stopPropagation()">
+      <div class="modal-title" id="photoModalTitle">Dokumentasi Foto QA/QC</div>
+      <img id="photoModalImg" src="" alt="Foto Dokumentasi" style="max-width:100%; max-height:65vh; border-radius:8px; margin:10px 0;" />
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <a id="photoModalLink" href="#" target="_blank" style="font-size:0.8rem; color:var(--blue);">Buka di Google Drive &rarr;</a>
+        <button class="btn btn-light" onclick="closeModal('photoModal')">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRINTABLE PDF REPORT AREA -->
+  <div id="printReportArea"></div>
+
+  <script>
+    // =========================================================================
+    // KONFIGURASI UTAMA:
+    // Tempel URL Web App Google Apps Script Anda di dalam tanda kutip di bawah
+    // agar setiap perangkat yang membuka GitHub Pages otomatis terhubung!
+    // =========================================================================
+    const DEFAULT_API_URL = "https://script.google.com/macros/s/AKfycbxSo5V7ULxh0XMthVDQBOSw5qegK2hCsaqVwfMAygADpDcFo_86EIk7-gPENAFjfiMRTA/exec";
+
+    // State Aplikasi
+    let apiUrl = localStorage.getItem("tangguh_api_url") || DEFAULT_API_URL;
+    let curveMode = "pct"; // 'pct' atau 'qty'
+    let compressedBase64 = "";
+
+    // Data Default (dipakai otomatis jika belum terhubung ke Google Sheets)
+    const defaultTargets = [
+      { id: "SEC-01", section: "Umpak & Angkur", warna: "Merah", hex: "#dc2626", satuan: "Set", target: 20, planW1: 10, planW2: 18, planW3: 20, planW4: 20 },
+      { id: "SEC-02", section: "Modul A - Struktur Utama", warna: "Biru", hex: "#2563eb", satuan: "Batang", target: 40, planW1: 5, planW2: 20, planW3: 35, planW4: 40 },
+      { id: "SEC-03", section: "Modul B - Rangka Atap", warna: "Kuning", hex: "#eab308", satuan: "Batang", target: 60, planW1: 0, planW2: 15, planW3: 45, planW4: 60 },
+      { id: "SEC-04", section: "Dudukan / Bracket MEP", warna: "Hijau", hex: "#16a34a", satuan: "Set", target: 30, planW1: 0, planW2: 10, planW3: 22, planW4: 30 },
+      { id: "SEC-05", section: "Baut & Aksesoris", warna: "Putih", hex: "#94a3b8", satuan: "Paket", target: 15, planW1: 2, planW2: 6, planW3: 12, planW4: 15 }
+    ];
+
+    const defaultLogs = [
+      { idLog: "LOG-101", tanggal: "2026-11-24 09:30", minggu: "W1", section: "Umpak & Angkur", kodeLabel: "UMP-A1 s/d A6", qtyOk: 6, qtyRework: 0, statusLabel: "Sudah Dilabel", catatan: "Cek mal base plate & angkur M20 presisi", fotoUrl: "", statusApproval: "Approved", approvedBy: "PM - Hendra (2026-11-24 11:00)", statusPapua: "Siap Kirim" },
+      { idLog: "LOG-102", tanggal: "2026-11-24 14:15", minggu: "W1", section: "Umpak & Angkur", kodeLabel: "UMP-B1 s/d B4", qtyOk: 4, qtyRework: 1, statusLabel: "Sudah Dilabel", catatan: "4 set OK, 1 set UMP-B5 las sengkang kurang penuh (rework)", fotoUrl: "", statusApproval: "Menunggu Approval", approvedBy: "-", statusPapua: "Siap Kirim" },
+      { idLog: "LOG-103", tanggal: "2026-11-25 10:20", minggu: "W1", section: "Modul A - Struktur Utama", kodeLabel: "STR-A-01 s/d 06", qtyOk: 6, qtyRework: 0, statusLabel: "Sudah Dilabel", catatan: "Kolom WF 200x100 hard stamp + cat ujung biru", fotoUrl: "", statusApproval: "Approved", approvedBy: "PM - Hendra (2026-11-25 13:10)", statusPapua: "Siap Kirim" },
+      { idLog: "LOG-104", tanggal: "2026-11-26 15:00", minggu: "W2", section: "Modul B - Rangka Atap", kodeLabel: "ATP-B-01 s/d 12", qtyOk: 12, qtyRework: 0, statusLabel: "Sudah Dilabel", catatan: "Gording Kanal C 2 bundel @6 batang + tanda TOP", fotoUrl: "", statusApproval: "Menunggu Approval", approvedBy: "-", statusPapua: "Siap Kirim" }
+    ];
+
+    let targets = JSON.parse(localStorage.getItem("tangguh_targets")) || defaultTargets;
+    let logs = JSON.parse(localStorage.getItem("tangguh_logs")) || defaultLogs;
+    let offlineQueue = JSON.parse(localStorage.getItem("tangguh_offline_queue")) || [];
+
+    // Inisialisasi Awal
+    window.addEventListener("DOMContentLoaded", () => {
+      updateConnectionUI();
+      populateSectionDropdown();
+      renderAll();
+      updateOfflineBanner();
+      if (apiUrl) {
+        syncFromCloud();
+      }
+    });
+
+    function updateConnectionUI() {
+      const badge = document.getElementById("connBadge");
+      const text = document.getElementById("connText");
+      const banner = document.getElementById("setupBanner");
+      if (apiUrl && apiUrl.startsWith("http")) {
+        badge.className = "badge-conn badge-online";
+        text.textContent = "Terhubung Google Sheets";
+        banner.style.display = "none";
+      } else {
+        badge.className = "badge-conn badge-demo";
+        text.textContent = "Mode Lokal (Demo)";
+        banner.style.display = "flex";
+      }
+    }
+
+    function populateSectionDropdown() {
+      const sel = document.getElementById("inpSection");
+      const current = sel.value;
+      sel.innerHTML = targets.map(t => `<option value="${t.section}">${t.section} (${t.warna})</option>`).join("");
+      if (current) sel.value = current;
+      updateSectionHint();
+    }
+
+    function updateSectionHint() {
+      const secName = document.getElementById("inpSection").value;
+      const tObj = targets.find(t => t.section === secName);
+      if (!tObj) return;
+      const sumOk = logs.filter(l => l.section === secName).reduce((acc, l) => acc + Number(l.qtyOk || 0), 0);
+      const sisa = Math.max(0, Number(tObj.target) - sumOk);
+      document.getElementById("sectionHint").innerHTML = `
+        <span>Target: <strong>${tObj.target} ${tObj.satuan}</strong></span>
+        <span class="hint-ok">Lolos: ${sumOk} ${tObj.satuan}</span>
+        <span class="hint-sisa">Kurang: ${sisa} ${tObj.satuan}</span>
+      `;
+    }
+
+    // Kompresi Foto di Browser sebelum dikirim
+    function handlePhotoSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement("canvas");
+          const maxW = 1000;
+          let w = img.width;
+          let h = img.height;
+          if (w > maxW) {
+            h = Math.round((h * maxW) / w);
+            w = maxW;
+          }
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, w, h);
+          compressedBase64 = canvas.toDataURL("image/jpeg", 0.75);
+          const prev = document.getElementById("fotoPreview");
+          prev.src = compressedBase64;
+          prev.style.display = "block";
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Submit Form Inspeksi
+    async function handleFormSubmit(e) {
+      e.preventDefault();
+      const btn = document.getElementById("btnSubmitQc");
+      btn.disabled = true;
+      btn.textContent = "Menyimpan data...";
+
+      const now = new Date();
+      const pad = n => String(n).padStart(2, "0");
+      const nowStr = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+
+      const payload = {
+        action: "addLog",
+        tanggal: nowStr,
+        minggu: document.getElementById("inpMinggu").value,
+        section: document.getElementById("inpSection").value,
+        kodeLabel: document.getElementById("inpKode").value.trim(),
+        qtyOk: Number(document.getElementById("inpQtyOk").value) || 0,
+        qtyRework: Number(document.getElementById("inpQtyRework").value) || 0,
+        statusLabel: document.getElementById("inpStatusLabel").value,
+        catatan: document.getElementById("inpCatatan").value.trim(),
+        fotoBase64: compressedBase64
+      };
+
+      const localEntry = {
+        idLog: "LOG-" + Date.now(),
+        tanggal: payload.tanggal,
+        minggu: payload.minggu,
+        section: payload.section,
+        kodeLabel: payload.kodeLabel,
+        qtyOk: payload.qtyOk,
+        qtyRework: payload.qtyRework,
+        statusLabel: payload.statusLabel,
+        catatan: payload.catatan,
+        fotoUrl: compressedBase64 || "",
+        statusApproval: (payload.qtyRework > 0 && payload.qtyOk === 0) ? "Rework" : "Menunggu Approval",
+        approvedBy: "-",
+        statusPapua: "Siap Kirim"
+      };
+
+      if (apiUrl && apiUrl.startsWith("http")) {
+        try {
+          const res = await fetch(apiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify(payload)
+          });
+          const result = await res.json();
+          if (result.status === "success") {
+            localEntry.idLog = result.idLog || localEntry.idLog;
+            if (result.fotoUrl) localEntry.fotoUrl = result.fotoUrl;
+            logs.unshift(localEntry);
+            saveLocalState();
+            resetForm();
+            renderAll();
+            alert("Berhasil! Data & foto tersimpan di Google Sheets & Google Drive.");
+          } else {
+            throw new Error(result.message || "Gagal simpan ke server");
+          }
+        } catch (err) {
+          // Masuk antrean offline jika sinyal workshop terputus
+          offlineQueue.push(payload);
+          localStorage.setItem("tangguh_offline_queue", JSON.stringify(offlineQueue));
+          logs.unshift(localEntry);
+          saveLocalState();
+          updateOfflineBanner();
+          resetForm();
+          renderAll();
+          alert("Koneksi terganggu. Data disimpan di Antrean Offline HP dan bisa dikirim saat sinyal stabil.");
+        }
+      } else {
+        // Mode Lokal
+        logs.unshift(localEntry);
+        saveLocalState();
+        resetForm();
+        renderAll();
+      }
+
+      btn.disabled = false;
+      btn.textContent = "Simpan & Sinkron ke Kantor";
+    }
+
+    function resetForm() {
+      document.getElementById("inpKode").value = "";
+      document.getElementById("inpQtyOk").value = "1";
+      document.getElementById("inpQtyRework").value = "0";
+      document.getElementById("inpCatatan").value = "";
+      document.getElementById("inpFoto").value = "";
+      compressedBase64 = "";
+      const prev = document.getElementById("fotoPreview");
+      prev.src = "";
+      prev.style.display = "none";
+    }
+
+    function saveLocalState() {
+      localStorage.setItem("tangguh_targets", JSON.stringify(targets));
+      localStorage.setItem("tangguh_logs", JSON.stringify(logs));
+    }
+
+    function updateOfflineBanner() {
+      const b = document.getElementById("offlineBanner");
+      if (offlineQueue.length > 0) {
+        document.getElementById("offlineCount").textContent = offlineQueue.length;
+        b.style.display = "flex";
+      } else {
+        b.style.display = "none";
+      }
+    }
+
+    async function flushOfflineQueue() {
+      if (!apiUrl) return openDbModal();
+      const remaining = [];
+      for (const item of offlineQueue) {
+        try {
+          const res = await fetch(apiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify(item)
+          });
+          const data = await res.json();
+          if (data.status !== "success") remaining.push(item);
+        } catch (e) {
+          remaining.push(item);
+        }
+      }
+      offlineQueue = remaining;
+      localStorage.setItem("tangguh_offline_queue", JSON.stringify(offlineQueue));
+      updateOfflineBanner();
+      if (remaining.length === 0) {
+        alert("Semua antrean offline berhasil dikirim ke Google Sheets!");
+        syncFromCloud();
+      } else {
+        alert("Sebagian data masih tertunda karena koneksi belum stabil.");
+      }
+    }
+
+    // Sinkronisasi Tarik Data dari Google Sheets
+    async function syncFromCloud() {
+      if (!apiUrl || !apiUrl.startsWith("http")) return;
+      const badgeText = document.getElementById("connText");
+      badgeText.textContent = "Menyinkronkan...";
+      try {
+        const res = await fetch(apiUrl + "?action=getAll");
+        const data = await res.json();
+        if (data.status === "success") {
+          if (data.targets && data.targets.length > 0) {
+            const colorMap = { "Merah": "#dc2626", "Biru": "#2563eb", "Kuning": "#eab308", "Hijau": "#16a34a", "Putih": "#94a3b8" };
+            targets = data.targets.map(t => ({ ...t, hex: colorMap[t.warna] || "#64748b" }));
+          }
+          if (data.logs) {
+            logs = data.logs.slice().reverse();
+          }
+          saveLocalState();
+          populateSectionDropdown();
+          renderAll();
+          badgeText.textContent = "Terhubung Google Sheets";
+        }
+      } catch (err) {
+        badgeText.textContent = "Gagal Sinkron (Cek URL)";
+      }
+    }
+
+    // Render Semua Komponen Dashboard
+    function renderAll() {
+      updateSectionHint();
+      renderKpisAndRekap();
+      renderSCurve();
+      renderLogsTable();
+      renderPapuaTable();
+    }
+
+    function renderKpisAndRekap() {
+      let totalTarget = 0;
+      let totalOk = 0;
+      let totalRework = 0;
+      let rowsHtml = "";
+
+      targets.forEach(t => {
+        const secLogs = logs.filter(l => l.section === t.section);
+        const ok = secLogs.reduce((s, l) => s + Number(l.qtyOk || 0), 0);
+        const rw = secLogs.reduce((s, l) => s + Number(l.qtyRework || 0), 0);
+        const labeled = secLogs.filter(l => l.statusLabel === "Sudah Dilabel").reduce((s, l) => s + Number(l.qtyOk || 0), 0);
+        const sisa = Math.max(0, Number(t.target) - ok);
+        const pct = t.target > 0 ? Math.min(100, Math.round((ok / t.target) * 100)) : 0;
+
+        totalTarget += Number(t.target || 0);
+        totalOk += ok;
+        totalRework += rw;
+
+        rowsHtml += `
+          <tr>
+            <td><strong>${t.section}</strong></td>
+            <td><span class="color-tag"><span class="swatch" style="background:${t.hex || '#64748b'}"></span>${t.warna}</span></td>
+            <td class="text-right"><strong>${t.target}</strong> ${t.satuan}</td>
+            <td class="text-right" style="color:var(--green); font-weight:700;">${ok} ${t.satuan}</td>
+            <td class="text-right" style="color:${rw > 0 ? 'var(--red)' : 'var(--slate-muted)'}; font-weight:600;">${rw}</td>
+            <td class="text-right" style="color:${sisa > 0 ? 'var(--amber)' : 'var(--green)'}; font-weight:700;">${sisa} ${t.satuan}</td>
+            <td class="text-right">${labeled} ${t.satuan}</td>
+            <td>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <div class="prog-bg"><div class="prog-fill" style="width:${pct}%"></div></div>
+                <span style="font-size:0.74rem; font-weight:700;">${pct}%</span>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+
+      const totalSisa = Math.max(0, totalTarget - totalOk);
+      const overallPct = totalTarget > 0 ? ((totalOk / totalTarget) * 100).toFixed(1) : "0.0";
+      const approvedCount = logs.filter(l => l.statusApproval === "Approved").length;
+      const pendingCount = logs.filter(l => l.statusApproval === "Menunggu Approval").length;
+
+      rowsHtml += `
+        <tr style="background:#f1f5f9; font-weight:700;">
+          <td colspan="2">TOTAL KESELURUHAN PROYEK</td>
+          <td class="text-right">${totalTarget}</td>
+          <td class="text-right" style="color:var(--green);">${totalOk}</td>
+          <td class="text-right" style="color:var(--red);">${totalRework}</td>
+          <td class="text-right" style="color:var(--amber);">${totalSisa}</td>
+          <td class="text-right">-</td>
+          <td>${overallPct}%</td>
+        </tr>
+      `;
+
+      document.getElementById("rekapTableBody").innerHTML = rowsHtml;
+      document.getElementById("kpiTotalTarget").textContent = totalTarget;
+      document.getElementById("kpiTotalOk").textContent = totalOk;
+      document.getElementById("kpiPctOk").textContent = `${overallPct}% dari target fabrikasi`;
+      document.getElementById("kpiTotalSisa").textContent = totalSisa;
+      document.getElementById("kpiReworkInfo").textContent = `${totalRework} item dalam status rework`;
+      document.getElementById("kpiApprovedCount").textContent = approvedCount;
+      document.getElementById("kpiPendingApp").textContent = `${pendingCount} menunggu verifikasi PM`;
+    }
+
+    // Kurva S (SVG Chart + Table)
+    function setCurveMode(mode) {
+      curveMode = mode;
+      document.getElementById("btnModePct").style.borderColor = mode === "pct" ? "var(--blue)" : "var(--border)";
+      document.getElementById("btnModePct").style.color = mode === "pct" ? "var(--blue)" : "var(--slate-dark)";
+      document.getElementById("btnModeQty").style.borderColor = mode === "qty" ? "var(--blue)" : "var(--border)";
+      document.getElementById("btnModeQty").style.color = mode === "qty" ? "var(--blue)" : "var(--slate-dark)";
+      renderSCurve();
+    }
+
+    function renderSCurve() {
+      const totalTarget = targets.reduce((s, t) => s + Number(t.target || 0), 0) || 1;
+      const planQty = [
+        targets.reduce((s, t) => s + Number(t.planW1 || 0), 0),
+        targets.reduce((s, t) => s + Number(t.planW2 || 0), 0),
+        targets.reduce((s, t) => s + Number(t.planW3 || 0), 0),
+        targets.reduce((s, t) => s + Number(t.planW4 || 0), 0)
+      ];
+
+      const weeks = ["W1", "W2", "W3", "W4"];
+      let cumActual = 0;
+      const actualQty = weeks.map(w => {
+        const wOk = logs.filter(l => l.minggu === w).reduce((s, l) => s + Number(l.qtyOk || 0), 0);
+        cumActual += wOk;
+        return cumActual;
+      });
+
+      const planPct = planQty.map(q => Number(((q / totalTarget) * 100).toFixed(1)));
+      const actualPct = actualQty.map(q => Number(((q / totalTarget) * 100).toFixed(1)));
+
+      const pVals = curveMode === "pct" ? planPct : planQty;
+      const aVals = curveMode === "pct" ? actualPct : actualQty;
+      const maxY = curveMode === "pct" ? 100 : Math.max(totalTarget, ...pVals, ...aVals, 10);
+      const unitSuffix = curveMode === "pct" ? "%" : "";
+
+      // Render SVG
+      const W = 680, H = 220, padL = 48, padR = 25, padT = 20, padB = 34;
+      const plotW = W - padL - padR;
+      const plotH = H - padT - padB;
+      const xPos = idx => padL + ((idx + 1) / 4) * plotW;
+      const yPos = val => padT + plotH - (Math.min(val, maxY) / maxY) * plotH;
+
+      let gridSvg = "";
+      for (let i = 0; i <= 4; i++) {
+        const v = (maxY / 4) * i;
+        const y = yPos(v);
+        gridSvg += `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="#e2e8f0" stroke-dasharray="4 3" />`;
+        gridSvg += `<text x="${padL - 8}" y="${y + 4}" text-anchor="end" font-size="11" fill="#64748b">${Math.round(v)}${unitSuffix}</text>`;
+      }
+
+      const pPoints = [[padL, yPos(0)], ...pVals.map((v, i) => [xPos(i), yPos(v)])];
+      const aPoints = [[padL, yPos(0)], ...aVals.map((v, i) => [xPos(i), yPos(v)])];
+
+      const pPath = pPoints.map((pt, i) => (i === 0 ? `M ${pt[0]} ${pt[1]}` : `L ${pt[0]} ${pt[1]}`)).join(" ");
+      const aPath = aPoints.map((pt, i) => (i === 0 ? `M ${pt[0]} ${pt[1]}` : `L ${pt[0]} ${pt[1]}`)).join(" ");
+
+      let dotsSvg = "";
+      weeks.forEach((w, i) => {
+        const px = xPos(i), py = yPos(pVals[i]), ay = yPos(aVals[i]);
+        dotsSvg += `<text x="${px}" y="${H - 10}" text-anchor="middle" font-size="11" font-weight="600" fill="#334155">Minggu ${i+1} (${w})</text>`;
+        dotsSvg += `<circle cx="${px}" cy="${py}" r="4.5" fill="#64748b" />`;
+        dotsSvg += `<text x="${px}" y="${py - 8}" text-anchor="middle" font-size="10" fill="#475569">${pVals[i]}${unitSuffix}</text>`;
+        dotsSvg += `<circle cx="${px}" cy="${ay}" r="5" fill="#16a34a" stroke="#fff" stroke-width="1.5" />`;
+        dotsSvg += `<text x="${px}" y="${ay + 15}" text-anchor="middle" font-size="10.5" font-weight="700" fill="#166534">${aVals[i]}${unitSuffix}</text>`;
+      });
+
+      document.getElementById("scurveContainer").innerHTML = `
+        <svg viewBox="0 0 ${W} ${H}" style="width:100%; max-width:760px; height:auto; display:block;">
+          ${gridSvg}
+          <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H - padB}" stroke="#94a3b8" />
+          <line x1="${padL}" y1="${H - padB}" x2="${W - padR}" y2="${H - padB}" stroke="#94a3b8" />
+          <path d="${pPath}" fill="none" stroke="#64748b" stroke-width="2.5" stroke-dasharray="6 4" />
+          <path d="${aPath}" fill="none" stroke="#16a34a" stroke-width="3" />
+          ${dotsSvg}
+        </svg>
+      `;
+
+      // Render Table Below Curve
+      const deviasi = aVals.map((a, i) => Number((a - pVals[i]).toFixed(1)));
+      document.getElementById("scurveTableBody").innerHTML = `
+        <tr>
+          <td><strong>Rencana Kumulatif (Plan)</strong></td>
+          ${pVals.map(v => `<td class="text-center">${v}${unitSuffix}</td>`).join("")}
+        </tr>
+        <tr>
+          <td><strong style="color:var(--green);">Aktual Kumulatif (Lolos QA/QC)</strong></td>
+          ${aVals.map(v => `<td class="text-center" style="color:var(--green); font-weight:700;">${v}${unitSuffix}</td>`).join("")}
+        </tr>
+        <tr>
+          <td><strong>Deviasi (Aktual - Plan)</strong></td>
+          ${deviasi.map(d => `<td class="text-center" style="color:${d >= 0 ? 'var(--green)' : 'var(--red)'}; font-weight:700;">${d >= 0 ? '+' : ''}${d}${unitSuffix}</td>`).join("")}
+        </tr>
+      `;
+    }
+
+    // Tabel Log & Approval Atasan
+    function renderLogsTable() {
+      const filter = document.getElementById("filterStatus").value;
+      const filtered = logs.filter(l => filter === "ALL" || l.statusApproval === filter);
+
+      if (filtered.length === 0) {
+        document.getElementById("logTableBody").innerHTML = `<tr><td colspan="7" class="text-center" style="color:var(--slate-muted); padding:18px;">Belum ada data log inspeksi pada filter ini.</td></tr>`;
+        return;
+      }
+
+      document.getElementById("logTableBody").innerHTML = filtered.map(l => {
+        let pillClass = "pill-amber";
+        if (l.statusApproval === "Approved") pillClass = "pill-green";
+        if (l.statusApproval === "Rework") pillClass = "pill-red";
+
+        const photoBtn = l.fotoUrl
+          ? `<button class="btn btn-light btn-sm" onclick="openPhotoModal('${l.kodeLabel}', '${l.fotoUrl}')">Lihat Foto</button>`
+          : `<span style="font-size:0.74rem; color:#94a3b8;">Tanpa foto</span>`;
+
+        return `
+          <tr>
+            <td>
+              <div style="font-weight:600;">${l.tanggal}</div>
+              <span class="pill pill-blue">${l.minggu}</span>
+            </td>
+            <td>
+              <div style="font-weight:700; color:var(--navy);">${l.kodeLabel}</div>
+              <div style="font-size:0.75rem; color:var(--slate-muted);">${l.section}</div>
+            </td>
+            <td class="text-center">
+              <span style="color:var(--green); font-weight:700;">${l.qtyOk} OK</span>
+              ${l.qtyRework > 0 ? `<br><span style="color:var(--red); font-size:0.74rem; font-weight:700;">${l.qtyRework} RW</span>` : ""}
+            </td>
+            <td class="text-center">${photoBtn}</td>
+            <td style="max-width:220px; font-size:0.78rem;">${l.catatan || "-"}</td>
+            <td>
+              <span class="pill ${pillClass}">${l.statusApproval}</span>
+              ${l.approvedBy && l.approvedBy !== "-" ? `<div style="font-size:0.71rem; color:var(--slate-muted); margin-top:3px;">Oleh: ${l.approvedBy}</div>` : ""}
+            </td>
+            <td class="text-center">
+              <button class="btn ${l.statusApproval === 'Approved' ? 'btn-light' : 'btn-success'} btn-sm" onclick="openApproveModal('${l.idLog}', '${l.kodeLabel}')">
+                ${l.statusApproval === 'Approved' ? 'Ubah Status' : 'Approve'}
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    // Tab 2: Site Papua
+    function renderPapuaTable() {
+      const readyItems = logs.filter(l => Number(l.qtyOk) > 0);
+      if (readyItems.length === 0) {
+        document.getElementById("papuaTableBody").innerHTML = `<tr><td colspan="6" class="text-center" style="padding:18px; color:var(--slate-muted);">Belum ada item lolos QA/QC yang siap dikirim ke Papua.</td></tr>`;
+        return;
+      }
+
+      const statuses = ["Siap Kirim", "Dalam Pengiriman", "Tiba di Site", "Terpasang / Baut OK", "Inspeksi Maincon OK"];
+      document.getElementById("papuaTableBody").innerHTML = readyItems.map(l => {
+        const isDone = l.statusPapua === "Terpasang / Baut OK" || l.statusPapua === "Inspeksi Maincon OK";
+        return `
+          <tr>
+            <td><strong>${l.kodeLabel}</strong></td>
+            <td>${l.section}</td>
+            <td class="text-center"><strong>${l.qtyOk}</strong></td>
+            <td><span class="pill ${l.statusApproval === 'Approved' ? 'pill-green' : 'pill-amber'}">${l.statusApproval}</span></td>
+            <td><span class="pill ${isDone ? 'pill-green' : 'pill-blue'}">${l.statusPapua || 'Siap Kirim'}</span></td>
+            <td>
+              <select class="form-control" style="width:auto; padding:4px 8px; font-size:0.78rem;" onchange="updatePapuaStatus('${l.idLog}', this.value)">
+                ${statuses.map(st => `<option value="${st}" ${(l.statusPapua || 'Siap Kirim') === st ? 'selected' : ''}>${st}</option>`).join("")}
+              </select>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    async function updatePapuaStatus(idLog, newStatus) {
+      const idx = logs.findIndex(l => l.idLog === idLog);
+      if (idx > -1) {
+        logs[idx].statusPapua = newStatus;
+        saveLocalState();
+        renderPapuaTable();
+      }
+      if (apiUrl && apiUrl.startsWith("http")) {
+        try {
+          await fetch(apiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({ action: "updatePapuaStatus", idLog, statusPapua: newStatus })
+          });
+        } catch (e) { console.warn("Gagal update status Papua ke cloud", e); }
+      }
+    }
+
+    // Modal Functions
+    function openDbModal() {
+      document.getElementById("inpApiUrl").value = apiUrl;
+      document.getElementById("dbModal").classList.add("show");
+    }
+
+    async function saveApiUrl() {
+      const val = document.getElementById("inpApiUrl").value.trim();
+      apiUrl = val;
+      localStorage.setItem("tangguh_api_url", apiUrl);
+      updateConnectionUI();
+      closeModal("dbModal");
+      if (apiUrl) {
+        await syncFromCloud();
+        alert("URL tersimpan dan berhasil terhubung dengan Google Sheets!");
+      }
+    }
+
+    function openTargetModal() {
+      document.getElementById("targetEditBody").innerHTML = targets.map((t, idx) => `
+        <tr>
+          <td><strong>${t.section}</strong> (${t.satuan})</td>
+          <td><input type="number" id="t_tot_${idx}" class="form-control" value="${t.target}" min="0" /></td>
+          <td><input type="number" id="t_w1_${idx}" class="form-control" value="${t.planW1}" min="0" /></td>
+          <td><input type="number" id="t_w2_${idx}" class="form-control" value="${t.planW2}" min="0" /></td>
+          <td><input type="number" id="t_w3_${idx}" class="form-control" value="${t.planW3}" min="0" /></td>
+          <td><input type="number" id="t_w4_${idx}" class="form-control" value="${t.planW4}" min="0" /></td>
+        </tr>
+      `).join("");
+      document.getElementById("targetModal").classList.add("show");
+    }
+
+    async function saveTargets() {
+      const btn = document.getElementById("btnSaveTargets");
+      btn.disabled = true;
+      btn.textContent = "Menyimpan...";
+
+      targets = targets.map((t, idx) => ({
+        ...t,
+        target: Number(document.getElementById(`t_tot_${idx}`).value) || 0,
+        planW1: Number(document.getElementById(`t_w1_${idx}`).value) || 0,
+        planW2: Number(document.getElementById(`t_w2_${idx}`).value) || 0,
+        planW3: Number(document.getElementById(`t_w3_${idx}`).value) || 0,
+        planW4: Number(document.getElementById(`t_w4_${idx}`).value) || 0
+      }));
+
+      saveLocalState();
+      populateSectionDropdown();
+      renderAll();
+
+      if (apiUrl && apiUrl.startsWith("http")) {
+        try {
+          await fetch(apiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({ action: "updateTargets", targets })
+          });
+        } catch (e) { console.warn(e); }
+      }
+
+      btn.disabled = false;
+      btn.textContent = "Simpan Target BOQ";
+      closeModal("targetModal");
+    }
+
+    function openApproveModal(idLog, kodeLabel) {
+      document.getElementById("approveLogId").value = idLog;
+      document.getElementById("approveModalDesc").textContent = `Verifikasi hasil QA/QC untuk kode label: ${kodeLabel}`;
+      document.getElementById("approveModal").classList.add("show");
+    }
+
+    async function submitApproval() {
+      const idLog = document.getElementById("approveLogId").value;
+      const approverName = document.getElementById("inpApproverName").value.trim() || "Project Manager";
+      const decision = document.getElementById("inpApproveDecision").value;
+      const btn = document.getElementById("btnConfirmApprove");
+
+      btn.disabled = true;
+      btn.textContent = "Memproses...";
+
+      const now = new Date();
+      const pad = n => String(n).padStart(2, "0");
+      const nowStr = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+
+      const idx = logs.findIndex(l => l.idLog === idLog);
+      if (idx > -1) {
+        logs[idx].statusApproval = decision;
+        logs[idx].approvedBy = `${approverName} (${nowStr})`;
+        saveLocalState();
+        renderAll();
+      }
+
+      if (apiUrl && apiUrl.startsWith("http")) {
+        try {
+          await fetch(apiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({ action: "approveLog", idLog, statusApproval: decision, approverName })
+          });
+        } catch (e) { console.warn(e); }
+      }
+
+      btn.disabled = false;
+      btn.textContent = "Simpan Approval";
+      closeModal("approveModal");
+    }
+
+    function openPhotoModal(kode, url) {
+      document.getElementById("photoModalTitle").textContent = `Dokumentasi Foto: ${kode}`;
+      document.getElementById("photoModalImg").src = url;
+      document.getElementById("photoModalLink").href = url;
+      document.getElementById("photoModal").classList.add("show");
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove("show");
+    }
+
+    function switchTab(tab) {
+      document.getElementById("viewJakarta").style.display = tab === "jakarta" ? "block" : "none";
+      document.getElementById("viewPapua").style.display = tab === "papua" ? "block" : "none";
+      document.getElementById("tabBtnJakarta").classList.toggle("active", tab === "jakarta");
+      document.getElementById("tabBtnPapua").classList.toggle("active", tab === "papua");
+    }
+
+    // Cetak Laporan PDF Resmi (A4)
+    function printPdfReport() {
+      const today = new Date().toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" });
+      const rekapRows = targets.map(t => {
+        const ok = logs.filter(l => l.section === t.section).reduce((s, l) => s + Number(l.qtyOk || 0), 0);
+        const sisa = Math.max(0, Number(t.target) - ok);
+        const pct = t.target > 0 ? Math.round((ok / t.target) * 100) : 0;
+        return `<tr><td>${t.section}</td><td>${t.warna}</td><td style="text-align:right">${t.target} ${t.satuan}</td><td style="text-align:right">${ok} ${t.satuan}</td><td style="text-align:right">${sisa} ${t.satuan}</td><td style="text-align:center">${pct}%</td></tr>`;
+      }).join("");
+
+      const detailRows = logs.map((l, idx) => `
+        <tr>
+          <td style="text-align:center">${idx + 1}</td>
+          <td>${l.tanggal}</td>
+          <td><strong>${l.kodeLabel}</strong></td>
+          <td>${l.section}</td>
+          <td style="text-align:center">${l.qtyOk} OK / ${l.qtyRework} RW</td>
+          <td>${l.catatan || "-"}</td>
+          <td>${l.statusApproval}<br><small>${l.approvedBy !== "-" ? l.approvedBy : ""}</small></td>
+        </tr>
+      `).join("");
+
+      document.getElementById("printReportArea").innerHTML = `
+        <div class="print-header">
+          <h2>BERITA ACARA INSPEKSI QA/QC FABRIKASI &amp; KITTING</h2>
+          <p><strong>Proyek:</strong> Temporary Utility — LNG Tangguh (Bangunan Office &amp; Workshop) | <strong>Tanggal Cetak:</strong> ${today}</p>
+        </div>
+        <h4 style="margin-bottom:6px;">1. Rekapitulasi Capaian Target BOQ vs Aktual Fabrikasi</h4>
+        <table class="print-table">
+          <thead>
+            <tr><th>Section / Modul</th><th>Kode Warna</th><th>Target BOQ</th><th>Lolos QA/QC</th><th>Sisa / Kurang</th><th>Progres</th></tr>
+          </thead>
+          <tbody>${rekapRows}</tbody>
+        </table>
+        <h4 style="margin-bottom:6px;">2. Rincian Log Pemeriksaan &amp; Status Approval</h4>
+        <table class="print-table">
+          <thead>
+            <tr><th>No</th><th>Tanggal</th><th>Kode Label</th><th>Section / Modul</th><th>Qty</th><th>Catatan Inspeksi</th><th>Approval Atasan</th></tr>
+          </thead>
+          <tbody>${detailRows}</tbody>
+        </table>
+        <div class="sign-grid">
+          <div>
+            <div>Dibuat &amp; Diperiksa Oleh (Lapangan):</div>
+            <div class="sign-space"></div>
+            <div><strong>______________________________</strong></div>
+            <div>QA/QC &amp; MEP Site Engineer</div>
+          </div>
+          <div>
+            <div>Disetujui Oleh (Kantor Pusat):</div>
+            <div class="sign-space"></div>
+            <div><strong>______________________________</strong></div>
+            <div>Project Manager / Engineering Lead</div>
+          </div>
+        </div>
+      `;
+      window.print();
+    }
+  </script>
+</body>
+</html>
